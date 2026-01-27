@@ -16,6 +16,7 @@ struct ProfileView: View {
     
     @State private var selectedImage: UIImage?
     @State private var showingImagePicker = false
+    @State private var showingDocuments = false
     
     var body: some View {
         NavigationView {
@@ -113,7 +114,7 @@ struct ProfileView: View {
                         ProfileActionButton(
                             icon: "doc.text.fill",
                             title: "Documents & Licenses",
-                            action: {}
+                            action: { showingDocuments = true }
                         )
                         
                         ProfileActionButton(
@@ -162,6 +163,9 @@ struct ProfileView: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showingImagePicker) {
                 ImagePicker(selectedImage: $selectedImage)
+            }
+            .sheet(isPresented: $showingDocuments) {
+                DocumentsView()
             }
             .onAppear {
                 loadProfileImage()
