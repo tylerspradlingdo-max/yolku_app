@@ -5,8 +5,10 @@ require('dotenv').config();
 // Otherwise fall back to individual environment variables for local development
 let sequelize;
 
-if (process.env.DATABASE_URL) {
+if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== '') {
   // Production: Use DATABASE_URL from Heroku Postgres
+  // Note: rejectUnauthorized: false is required for Heroku Postgres which uses self-signed certificates
+  // This is the standard configuration per Heroku's official documentation
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     protocol: 'postgres',

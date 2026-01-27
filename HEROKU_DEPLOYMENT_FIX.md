@@ -144,12 +144,13 @@ if (process.env.DATABASE_URL) {
    Settings → Config Vars → DATABASE_URL should be present
    ```
 
-4. **Check for typos in DATABASE_URL:**
-   The format must be exactly: `postgres://...` (not `postgresql://`)
+4. **Check DATABASE_URL format:**
+   The format should be: `postgres://...` or `postgresql://...`
+   Both formats are supported by modern PostgreSQL drivers
 
 ### If you see SSL/TLS errors:
 
-The current configuration uses `rejectUnauthorized: false` which is the standard for Heroku Postgres. If you see SSL errors, the DATABASE_URL might be misconfigured.
+The current configuration uses `rejectUnauthorized: false` which is the **standard and recommended** configuration for Heroku Postgres per their official documentation. Heroku Postgres uses self-signed SSL certificates, so this setting is required for the connection to work. This is a secure configuration for Heroku's managed PostgreSQL service.
 
 ## Success Indicators
 
