@@ -8,6 +8,23 @@
 
 Yolku is a modern mobile application that bridges the gap between medical professionals and healthcare facilities. Our platform makes it easy for nurses, doctors, and allied health professionals to find shifts that match their skills and schedule, while helping healthcare facilities quickly fill their staffing needs.
 
+This repository contains both a **web landing page** (HTML/CSS/JavaScript) and a **native iOS app** (SwiftUI) implementation.
+
+## 📱 Available Implementations
+
+### Web Landing Page
+- **Location**: `index.html` (root directory)
+- **Technology**: HTML5, CSS3, JavaScript
+- **Deployment**: GitHub Pages, Netlify, Vercel
+- **View Live**: Open `index.html` in a browser
+
+### iOS App (SwiftUI)
+- **Location**: `YolkuApp/` directory
+- **Technology**: SwiftUI, iOS 17+
+- **Deployment**: App Store, TestFlight
+- **Open in Xcode**: `open YolkuApp/YolkuApp.xcodeproj`
+- **Documentation**: See [XCODE_GUIDE.md](XCODE_GUIDE.md)
+
 ## Features
 
 ✨ **Instant Connections** - Match with healthcare facilities in real-time and find shifts that fit your schedule and expertise.
@@ -24,23 +41,48 @@ Yolku is a modern mobile application that bridges the gap between medical profes
 
 ## Technologies Used
 
+### Web Landing Page
 - **HTML5** - Semantic markup for better accessibility
 - **CSS3** - Modern styling with animations and responsive design
 - **JavaScript** - Interactive features and smooth scrolling
 - **Responsive Design** - Mobile-first approach that works on all devices
 
+### iOS App
+- **SwiftUI** - Native iOS UI framework
+- **Xcode 15+** - Development environment
+- **iOS 17+** - Target platform
+- **Custom Components** - Reusable views and styles
+
 ## Repository Structure
 
 ```
 yolku_app/
-├── index.html          # Main landing page
-├── README.md           # Project documentation
-└── LICENSE             # MIT License
+├── index.html              # Web landing page (HTML/CSS/JS)
+├── README.md               # Main project documentation
+├── LICENSE                 # MIT License
+├── XCODE_GUIDE.md         # Complete guide for iOS app development
+└── YolkuApp/              # Native iOS app (SwiftUI)
+    ├── README.md          # iOS-specific documentation
+    ├── .gitignore         # Xcode gitignore
+    ├── YolkuApp.xcodeproj/    # Xcode project file
+    └── YolkuApp/          # Swift source code
+        ├── YolkuAppApp.swift      # App entry point
+        ├── ContentView.swift      # Main view
+        ├── HeroView.swift         # Hero section
+        ├── FeaturesView.swift     # Features section
+        ├── AppPreviewView.swift   # App preview
+        ├── DownloadView.swift     # Download section
+        ├── FooterView.swift       # Footer
+        ├── ColorExtension.swift   # Hex color support
+        ├── ButtonStyles.swift     # Custom button styles
+        └── Assets.xcassets/       # App assets
 ```
 
 ## Setup Instructions
 
-### Local Development
+### Web Landing Page
+
+#### Local Development
 
 1. **Clone the repository**
    ```bash
@@ -75,7 +117,45 @@ yolku_app/
    - Edit `index.html` to make changes
    - Refresh your browser to see updates
 
+### iOS App (SwiftUI)
+
+#### Requirements
+- macOS 13.0 or later
+- Xcode 15.0 or later
+- iOS 17.0+ (for deployment)
+
+#### Quick Start
+
+1. **Clone the repository** (if not already done)
+   ```bash
+   git clone https://github.com/tylerspradlingdo-max/yolku_app.git
+   cd yolku_app
+   ```
+
+2. **Open the Xcode project**
+   ```bash
+   cd YolkuApp
+   open YolkuApp.xcodeproj
+   ```
+
+3. **Build and run**
+   - Select a simulator (iPhone 15 Pro recommended) from the scheme menu
+   - Press ⌘R to build and run
+   - The app will launch in the simulator
+
+4. **Explore the code**
+   - All SwiftUI views are in `YolkuApp/YolkuApp/`
+   - Each section is a separate view file
+   - Press ⌘⌥↩ to see live previews
+
+#### Detailed Guide
+See [XCODE_GUIDE.md](XCODE_GUIDE.md) for comprehensive iOS development instructions.
+
 ## Deployment
+
+### Web Landing Page
+
+#### GitHub Pages
 
 ### GitHub Pages
 
