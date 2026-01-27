@@ -18,6 +18,32 @@ struct AvailabilityDate: Identifiable, Codable {
     var selectedStates: [String]
     var createdAt: Date
     
+    // Initialize with default empty array for backward compatibility
+    init(id: UUID = UUID(), date: Date, isFullDay: Bool, startTime: Date? = nil, endTime: Date? = nil, notes: String, selectedStates: [String] = [], createdAt: Date) {
+        self.id = id
+        self.date = date
+        self.isFullDay = isFullDay
+        self.startTime = startTime
+        self.endTime = endTime
+        self.notes = notes
+        self.selectedStates = selectedStates
+        self.createdAt = createdAt
+    }
+    
+    // Custom Codable implementation for backward compatibility
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        date = try container.decode(Date.self, forKey: .date)
+        isFullDay = try container.decode(Bool.self, forKey: .isFullDay)
+        startTime = try container.decodeIfPresent(Date.self, forKey: .startTime)
+        endTime = try container.decodeIfPresent(Date.self, forKey: .endTime)
+        notes = try container.decode(String.self, forKey: .notes)
+        // Provide default empty array for backward compatibility with old data
+        selectedStates = try container.decodeIfPresent([String].self, forKey: .selectedStates) ?? []
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+    }
+    
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -289,20 +315,6 @@ struct AddAvailabilityView: View {
     @State private var notes = ""
     @State private var selectedStates: Set<String> = []
     
-    // US States list
-    private let usStates = [
-        "Alabama", "Alaska", "Arizona", "Arkansas", "California",
-        "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
-        "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
-        "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
-        "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
-        "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
-        "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
-        "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
-        "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
-        "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
-    ]
-    
     var body: some View {
         NavigationView {
             Form {
@@ -350,7 +362,7 @@ struct AddAvailabilityView: View {
                         }
                     }
                     
-                    NavigationLink(destination: StateSelectionView(selectedStates: $selectedStates, states: usStates)) {
+                    NavigationLink(destination: StateSelectionView(selectedStates: $selectedStates, states: Constants.usStates)) {
                         Label(selectedStates.isEmpty ? "Select States" : "Modify States", systemImage: "map")
                             .foregroundColor(Color(hex: "667eea"))
                     }
@@ -376,10 +388,14 @@ struct AddAvailabilityView: View {
                     }
                     .fontWeight(.semibold)
                     .foregroundColor(Color(hex: "667eea"))
-                    .disabled(selectedStates.isEmpty)
+                    .disabled(selectedStates.isEmpty || (!isFullDay && endTime <= startTime))
                 }
             }
         }
+    }
+    
+    private var isTimeRangeValid: Bool {
+        return isFullDay || endTime > startTime
     }
     
     private func saveAvailability() {
