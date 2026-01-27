@@ -15,7 +15,39 @@ struct AvailabilityDate: Identifiable, Codable {
     var startTime: Date?
     var endTime: Date?
     var notes: String
+    var selectedStates: [String]
     var createdAt: Date
+    
+    // Coding keys for Codable conformance
+    enum CodingKeys: String, CodingKey {
+        case id, date, isFullDay, startTime, endTime, notes, selectedStates, createdAt
+    }
+    
+    // Initialize with default empty array for backward compatibility
+    init(id: UUID = UUID(), date: Date, isFullDay: Bool, startTime: Date? = nil, endTime: Date? = nil, notes: String, selectedStates: [String] = [], createdAt: Date) {
+        self.id = id
+        self.date = date
+        self.isFullDay = isFullDay
+        self.startTime = startTime
+        self.endTime = endTime
+        self.notes = notes
+        self.selectedStates = selectedStates
+        self.createdAt = createdAt
+    }
+    
+    // Custom Codable implementation for backward compatibility
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        date = try container.decode(Date.self, forKey: .date)
+        isFullDay = try container.decode(Bool.self, forKey: .isFullDay)
+        startTime = try container.decodeIfPresent(Date.self, forKey: .startTime)
+        endTime = try container.decodeIfPresent(Date.self, forKey: .endTime)
+        notes = try container.decode(String.self, forKey: .notes)
+        // Provide default empty array for backward compatibility with old data
+        selectedStates = try container.decodeIfPresent([String].self, forKey: .selectedStates) ?? []
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+    }
     
     var formattedDate: String {
         let formatter = DateFormatter()
@@ -32,6 +64,16 @@ struct AvailabilityDate: Identifiable, Codable {
             return "\(formatter.string(from: start)) - \(formatter.string(from: end))"
         }
         return "All Day"
+    }
+    
+    var statesString: String {
+        if selectedStates.isEmpty {
+            return "No states selected"
+        } else if selectedStates.count <= 3 {
+            return selectedStates.joined(separator: ", ")
+        } else {
+            return "\(selectedStates.prefix(3).joined(separator: ", ")) + \(selectedStates.count - 3) more"
+        }
     }
 }
 
@@ -223,6 +265,15 @@ struct AvailabilityCard: View {
                     .font(.subheadline)
                     .foregroundColor(Color(hex: "667eea"))
                 
+                HStack(spacing: 4) {
+                    Image(systemName: "map.fill")
+                        .font(.caption)
+                        .foregroundColor(Color(hex: "764ba2"))
+                    Text(availability.statesString)
+                        .font(.caption)
+                        .foregroundColor(Color(hex: "764ba2"))
+                }
+                
                 if !availability.notes.isEmpty {
                     Text(availability.notes)
                         .font(.caption)
@@ -267,6 +318,7 @@ struct AddAvailabilityView: View {
     @State private var startTime = Date()
     @State private var endTime = Date()
     @State private var notes = ""
+    @State private var selectedStates: Set<String> = []
     
     var body: some View {
         NavigationView {
@@ -282,6 +334,42 @@ struct AddAvailabilityView: View {
                     if !isFullDay {
                         DatePicker("Start Time", selection: $startTime, displayedComponents: .hourAndMinute)
                         DatePicker("End Time", selection: $endTime, displayedComponents: .hourAndMinute)
+                    }
+                }
+                
+                Section(header: HStack {
+                    Text("Available States")
+                    Spacer()
+                    if !selectedStates.isEmpty {
+                        Text("(\(selectedStates.count) selected)")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                }) {
+                    if selectedStates.isEmpty {
+                        Text("No states selected")
+                            .foregroundColor(.gray)
+                            .italic()
+                    } else {
+                        ForEach(Array(selectedStates).sorted(), id: \.self) { state in
+                            HStack {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(Color(hex: "667eea"))
+                                Text(state)
+                                Spacer()
+                                Button(action: {
+                                    selectedStates.remove(state)
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        }
+                    }
+                    
+                    NavigationLink(destination: StateSelectionView(selectedStates: $selectedStates, states: Constants.usStates)) {
+                        Label(selectedStates.isEmpty ? "Select States" : "Modify States", systemImage: "map")
+                            .foregroundColor(Color(hex: "667eea"))
                     }
                 }
                 
@@ -305,6 +393,7 @@ struct AddAvailabilityView: View {
                     }
                     .fontWeight(.semibold)
                     .foregroundColor(Color(hex: "667eea"))
+                    .disabled(selectedStates.isEmpty || (!isFullDay && endTime <= startTime))
                 }
             }
         }
@@ -317,10 +406,72 @@ struct AddAvailabilityView: View {
             startTime: isFullDay ? nil : startTime,
             endTime: isFullDay ? nil : endTime,
             notes: notes,
+            selectedStates: Array(selectedStates),
             createdAt: Date()
         )
         
         onSave(newAvailability)
         dismiss()
+    }
+}
+
+// MARK: - State Selection View
+struct StateSelectionView: View {
+    @Environment(\.dismiss) var dismiss
+    @Binding var selectedStates: Set<String>
+    let states: [String]
+    
+    @State private var searchText = ""
+    
+    var filteredStates: [String] {
+        if searchText.isEmpty {
+            return states
+        } else {
+            return states.filter { $0.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
+    
+    var body: some View {
+        List {
+            Section {
+                ForEach(filteredStates, id: \.self) { state in
+                    Button(action: {
+                        if selectedStates.contains(state) {
+                            selectedStates.remove(state)
+                        } else {
+                            selectedStates.insert(state)
+                        }
+                    }) {
+                        HStack {
+                            Text(state)
+                                .foregroundColor(.primary)
+                            Spacer()
+                            if selectedStates.contains(state) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(Color(hex: "667eea"))
+                            } else {
+                                Image(systemName: "circle")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                }
+            } header: {
+                if !selectedStates.isEmpty {
+                    Text("\(selectedStates.count) state\(selectedStates.count == 1 ? "" : "s") selected")
+                }
+            }
+        }
+        .searchable(text: $searchText, prompt: "Search states")
+        .navigationTitle("Select States")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Done") {
+                    dismiss()
+                }
+                .foregroundColor(Color(hex: "667eea"))
+            }
+        }
     }
 }
