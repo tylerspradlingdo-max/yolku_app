@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct HeroView: View {
+    @State private var showHealthcareWorkerSignUp = false
+    
     var body: some View {
         ZStack {
             LinearGradient(
@@ -30,7 +32,7 @@ struct HeroView: View {
                 
                 HStack(spacing: 16) {
                     Button("I'm a Healthcare Worker") {
-                        // Healthcare worker action
+                        showHealthcareWorkerSignUp = true
                     }
                     .buttonStyle(WhiteButtonStyle())
                     
@@ -42,6 +44,9 @@ struct HeroView: View {
                 .padding(.top, 10)
             }
             .padding(.vertical, 80)
+        }
+        .sheet(isPresented: $showHealthcareWorkerSignUp) {
+            HealthcareWorkerSignUpView()
         }
     }
 }

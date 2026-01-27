@@ -38,8 +38,8 @@ struct ContentView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {
-                        Button("Login") {
-                            // Login action
+                        Button("Sign In") {
+                            // Sign in action
                         }
                         .buttonStyle(OutlineButtonStyle())
                         
