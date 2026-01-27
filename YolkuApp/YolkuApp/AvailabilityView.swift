@@ -56,9 +56,13 @@ struct AvailabilityDate: Identifiable, Codable {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         
-        if let end = endDate, end > date {
-            // Date range
-            return "\(formatter.string(from: date)) - \(formatter.string(from: end))"
+        if let end = endDate {
+            // Date range - show even if same day to indicate it was selected as a range
+            if Calendar.current.isDate(date, inSameDayAs: end) {
+                return formatter.string(from: date)
+            } else {
+                return "\(formatter.string(from: date)) - \(formatter.string(from: end))"
+            }
         } else {
             // Single date
             return formatter.string(from: date)
@@ -338,7 +342,7 @@ struct AddAvailabilityView: View {
                 Section(header: Text("Date")) {
                     Toggle("Date Range", isOn: $isDateRange)
                         .tint(Color(hex: "667eea"))
-                        .onChange(of: isDateRange) { newValue in
+                        .onChange(of: isDateRange) { _, newValue in
                             // Initialize end date when switching to date range mode
                             if newValue && selectedEndDate < selectedDate {
                                 selectedEndDate = selectedDate
@@ -347,7 +351,7 @@ struct AddAvailabilityView: View {
                     
                     DatePicker(isDateRange ? "Start Date" : "Select Date", selection: $selectedDate, in: Date()..., displayedComponents: .date)
                         .datePickerStyle(.graphical)
-                        .onChange(of: selectedDate) { newValue in
+                        .onChange(of: selectedDate) { _, newValue in
                             // Ensure end date is always >= start date
                             if isDateRange && selectedEndDate < newValue {
                                 selectedEndDate = newValue
@@ -425,9 +429,7 @@ struct AddAvailabilityView: View {
                     }
                     .fontWeight(.semibold)
                     .foregroundColor(Color(hex: "667eea"))
-                    .disabled(selectedStates.isEmpty || 
-                             (!isFullDay && endTime <= startTime) ||
-                             (isDateRange && selectedEndDate < selectedDate))
+                    .disabled(selectedStates.isEmpty || (!isFullDay && endTime <= startTime))
                 }
             }
         }
