@@ -15,7 +15,7 @@ struct MyShiftsView: View {
         NavigationView {
             VStack(spacing: 0) {
                 // Segmented Control
-                Picker("Shifts", selection: $selectedSegment) {
+                Picker("Positions", selection: $selectedSegment) {
                     ForEach(0..<segments.count, id: \.self) { index in
                         Text(segments[index])
                     }
@@ -27,20 +27,20 @@ struct MyShiftsView: View {
                 // Content
                 ScrollView {
                     if selectedSegment == 0 {
-                        // Upcoming Shifts
+                        // Upcoming Positions
                         EmptyStateView(
                             icon: "calendar.badge.clock",
-                            title: "No Upcoming Shifts",
-                            subtitle: "Apply for shifts in the Find Shifts tab",
-                            buttonTitle: "Find Shifts",
+                            title: "No Upcoming Positions",
+                            subtitle: "Apply for positions in the Find Positions tab",
+                            buttonTitle: "Find Positions",
                             buttonAction: {}
                         )
                     } else {
-                        // Completed Shifts
+                        // Completed Positions
                         EmptyStateView(
                             icon: "checkmark.circle",
-                            title: "No Completed Shifts Yet",
-                            subtitle: "Your completed shifts will appear here",
+                            title: "No Completed Positions Yet",
+                            subtitle: "Your completed positions will appear here",
                             buttonTitle: nil,
                             buttonAction: nil
                         )
@@ -48,7 +48,7 @@ struct MyShiftsView: View {
                 }
                 .background(Color(hex: "f5f5f5"))
             }
-            .navigationTitle("My Shifts")
+            .navigationTitle("My Positions")
             .navigationBarTitleDisplayMode(.inline)
         }
     }

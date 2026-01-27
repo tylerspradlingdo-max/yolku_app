@@ -25,17 +25,17 @@ struct DashboardView: View {
                 }
                 .tag(0)
             
-            // Shifts Tab
+            // Positions Tab
             ShiftsView()
                 .tabItem {
-                    Label("Find Shifts", systemImage: "magnifyingglass")
+                    Label("Find Positions", systemImage: "magnifyingglass")
                 }
                 .tag(1)
             
-            // My Shifts Tab
+            // My Positions Tab
             MyShiftsView()
                 .tabItem {
-                    Label("My Shifts", systemImage: "calendar")
+                    Label("My Positions", systemImage: "calendar")
                 }
                 .tag(2)
             
@@ -113,7 +113,7 @@ struct HomeTabView: View {
                     
                     // Quick Stats
                     HStack(spacing: 16) {
-                        StatCard(icon: "briefcase.fill", value: "0", label: "Shifts Completed")
+                        StatCard(icon: "briefcase.fill", value: "0", label: "Positions Completed")
                         StatCard(icon: "star.fill", value: "5.0", label: "Rating")
                     }
                     .padding(.horizontal, 24)
@@ -128,7 +128,7 @@ struct HomeTabView: View {
                         VStack(spacing: 12) {
                             ActionButton(
                                 icon: "magnifyingglass",
-                                title: "Find Available Shifts",
+                                title: "Find Available Positions",
                                 subtitle: "Browse healthcare facilities near you",
                                 color: Color(hex: "667eea")
                             )
@@ -136,7 +136,7 @@ struct HomeTabView: View {
                             ActionButton(
                                 icon: "calendar",
                                 title: "View My Schedule",
-                                subtitle: "See your upcoming shifts",
+                                subtitle: "See your upcoming positions",
                                 color: Color(hex: "764ba2")
                             )
                             

@@ -64,12 +64,12 @@ struct ShiftsView: View {
                                 .foregroundColor(Color(hex: "667eea").opacity(0.3))
                                 .padding(.top, 60)
                             
-                            Text("No Shifts Available Yet")
+                            Text("No Positions Available Yet")
                                 .font(.title3)
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(hex: "333333"))
                             
-                            Text("Check back soon for available shifts\nfrom healthcare facilities near you")
+                            Text("Check back soon for available positions\nfrom healthcare facilities near you")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                                 .multilineTextAlignment(.center)
@@ -114,7 +114,7 @@ struct ShiftsView: View {
                 }
                 .background(Color(hex: "f5f5f5"))
             }
-            .navigationTitle("Find Shifts")
+            .navigationTitle("Find Positions")
             .navigationBarTitleDisplayMode(.inline)
         }
     }
