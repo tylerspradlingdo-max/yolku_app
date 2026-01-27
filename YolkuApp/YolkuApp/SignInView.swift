@@ -9,12 +9,14 @@ import SwiftUI
 
 struct SignInView: View {
     @Environment(\.dismiss) var dismiss
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
     
     @State private var email = ""
     @State private var password = ""
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var isLoading = false
+    @State private var navigateToDashboard = false
     
     var body: some View {
         NavigationView {
@@ -177,11 +179,14 @@ struct SignInView: View {
             .alert("Sign In", isPresented: $showAlert) {
                 Button("OK", role: .cancel) {
                     if alertMessage.contains("successful") {
-                        dismiss()
+                        navigateToDashboard = true
                     }
                 }
             } message: {
                 Text(alertMessage)
+            }
+            .fullScreenCover(isPresented: $navigateToDashboard) {
+                DashboardView()
             }
         }
     }
@@ -211,13 +216,15 @@ struct SignInView: View {
                     password: password
                 )
                 
-                // Store auth token securely
+                // Store auth token and user data securely
                 UserDefaults.standard.set(response.token, forKey: "authToken")
                 UserDefaults.standard.set(response.user.email, forKey: "userEmail")
                 UserDefaults.standard.set(response.user.firstName, forKey: "userFirstName")
+                UserDefaults.standard.set(response.user.profession ?? "Healthcare Professional", forKey: "userProfession")
                 
                 await MainActor.run {
                     isLoading = false
+                    isLoggedIn = true
                     alertMessage = "Sign in successful! Welcome back, \(response.user.firstName)!"
                     showAlert = true
                 }

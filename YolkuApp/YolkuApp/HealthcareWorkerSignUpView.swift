@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HealthcareWorkerSignUpView: View {
     @Environment(\.dismiss) var dismiss
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
     
     @State private var firstName = ""
     @State private var lastName = ""
@@ -22,6 +23,7 @@ struct HealthcareWorkerSignUpView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var isLoading = false
+    @State private var navigateToDashboard = false
     
     let professions = [
         "Registered Nurse (RN)",
@@ -180,11 +182,14 @@ struct HealthcareWorkerSignUpView: View {
             .alert("Sign Up", isPresented: $showAlert) {
                 Button("OK", role: .cancel) {
                     if alertMessage.contains("success") {
-                        dismiss()
+                        navigateToDashboard = true
                     }
                 }
             } message: {
                 Text(alertMessage)
+            }
+            .fullScreenCover(isPresented: $navigateToDashboard) {
+                DashboardView()
             }
         }
     }
@@ -244,13 +249,15 @@ struct HealthcareWorkerSignUpView: View {
                     licenseNumber: license.isEmpty ? nil : license
                 )
                 
-                // Store auth token securely
+                // Store auth token and user data securely
                 UserDefaults.standard.set(response.token, forKey: "authToken")
                 UserDefaults.standard.set(response.user.email, forKey: "userEmail")
                 UserDefaults.standard.set(response.user.firstName, forKey: "userFirstName")
+                UserDefaults.standard.set(response.user.profession ?? profession, forKey: "userProfession")
                 
                 await MainActor.run {
                     isLoading = false
+                    isLoggedIn = true
                     alertMessage = "Account created successfully! Welcome to Yolku, \(response.user.firstName)!"
                     showAlert = true
                 }
