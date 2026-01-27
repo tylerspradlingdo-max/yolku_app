@@ -8,6 +8,12 @@
 import Foundation
 
 struct APIConfig {
+    // MARK: - Testing Mode
+    
+    // Set to true to use mock data (no server required)
+    // Set to false to connect to real API
+    static let useMockMode = true // ⬅️ Change this to false when you have server connection
+    
     // MARK: - Base URL
     
     // Production Heroku URL

@@ -17,6 +17,33 @@ class APIService {
     // MARK: - Authentication
     
     func signIn(email: String, password: String) async throws -> AuthResponse {
+        // Mock mode - return fake success response without server
+        if APIConfig.useMockMode {
+            // Simulate network delay
+            try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+            
+            // Return mock successful sign in
+            return AuthResponse(
+                message: "Sign in successful! (Mock Mode)",
+                token: "mock_token_\(UUID().uuidString)",
+                user: User(
+                    id: UUID().uuidString,
+                    firstName: "Demo",
+                    lastName: "User",
+                    email: email,
+                    phoneNumber: "555-0123",
+                    profession: "RN",
+                    licenseNumber: "RN123456",
+                    isVerified: true,
+                    isActive: true,
+                    lastLogin: ISO8601DateFormatter().string(from: Date()),
+                    createdAt: ISO8601DateFormatter().string(from: Date()),
+                    updatedAt: ISO8601DateFormatter().string(from: Date())
+                )
+            )
+        }
+        
+        // Real API mode - connect to server
         guard let url = URL(string: APIConfig.Auth.signIn) else {
             throw APIError.invalidURL
         }
@@ -53,6 +80,33 @@ class APIService {
         profession: String,
         licenseNumber: String?
     ) async throws -> AuthResponse {
+        // Mock mode - return fake success response without server
+        if APIConfig.useMockMode {
+            // Simulate network delay
+            try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
+            
+            // Return mock successful sign up
+            return AuthResponse(
+                message: "Account created successfully! (Mock Mode)",
+                token: "mock_token_\(UUID().uuidString)",
+                user: User(
+                    id: UUID().uuidString,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    phoneNumber: phoneNumber,
+                    profession: profession,
+                    licenseNumber: licenseNumber,
+                    isVerified: false,
+                    isActive: true,
+                    lastLogin: nil,
+                    createdAt: ISO8601DateFormatter().string(from: Date()),
+                    updatedAt: ISO8601DateFormatter().string(from: Date())
+                )
+            )
+        }
+        
+        // Real API mode - connect to server
         guard let url = URL(string: APIConfig.Auth.signUp) else {
             throw APIError.invalidURL
         }
@@ -90,6 +144,29 @@ class APIService {
     }
     
     func getProfile(token: String) async throws -> User {
+        // Mock mode - return fake user profile
+        if APIConfig.useMockMode {
+            // Simulate network delay
+            try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            
+            // Return mock user profile
+            return User(
+                id: UUID().uuidString,
+                firstName: "Demo",
+                lastName: "User",
+                email: "demo@yolku.com",
+                phoneNumber: "555-0123",
+                profession: "RN",
+                licenseNumber: "RN123456",
+                isVerified: true,
+                isActive: true,
+                lastLogin: ISO8601DateFormatter().string(from: Date()),
+                createdAt: ISO8601DateFormatter().string(from: Date()),
+                updatedAt: ISO8601DateFormatter().string(from: Date())
+            )
+        }
+        
+        // Real API mode - connect to server
         guard let url = URL(string: APIConfig.Users.profile) else {
             throw APIError.invalidURL
         }
