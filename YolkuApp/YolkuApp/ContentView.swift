@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var showMenu = false
+    @State private var showSignIn = false
     
     var body: some View {
         NavigationView {
@@ -39,7 +40,7 @@ struct ContentView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {
                         Button("Sign In") {
-                            // Sign in action
+                            showSignIn = true
                         }
                         .buttonStyle(OutlineButtonStyle())
                         
@@ -49,6 +50,9 @@ struct ContentView: View {
                         .buttonStyle(GradientButtonStyle())
                     }
                 }
+            }
+            .sheet(isPresented: $showSignIn) {
+                SignInView()
             }
         }
     }
