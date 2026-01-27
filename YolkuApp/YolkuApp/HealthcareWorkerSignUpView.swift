@@ -21,6 +21,7 @@ struct HealthcareWorkerSignUpView: View {
     @State private var agreeToTerms = false
     @State private var showAlert = false
     @State private var alertMessage = ""
+    @State private var isLoading = false
     
     let professions = [
         "Registered Nurse (RN)",
@@ -114,20 +115,28 @@ struct HealthcareWorkerSignUpView: View {
                     
                     // Submit Button
                     Button(action: handleSignUp) {
-                        Text("Create Account")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(
-                                LinearGradient(
-                                    colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(25)
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                        } else {
+                            Text("Create Account")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                        }
                     }
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(25)
+                    .disabled(isLoading)
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
                     
@@ -194,15 +203,71 @@ struct HealthcareWorkerSignUpView: View {
             return
         }
         
+        if password.count < 8 {
+            alertMessage = "Password must be at least 8 characters long"
+            showAlert = true
+            return
+        }
+        
         if !agreeToTerms {
             alertMessage = "Please agree to the Terms of Service and Privacy Policy"
             showAlert = true
             return
         }
         
-        // Here you would typically send the form data to your backend
-        alertMessage = "Account created successfully! Welcome to Yolku!"
-        showAlert = true
+        isLoading = true
+        
+        // Extract profession abbreviation for API (e.g., "RN" from "Registered Nurse (RN)")
+        let professionCode: String
+        if profession.contains("(") && profession.contains(")") {
+            let start = profession.firstIndex(of: "(")!
+            let end = profession.firstIndex(of: ")")!
+            professionCode = String(profession[profession.index(after: start)..<end])
+        } else if profession.contains("Doctor") || profession.contains("Physician") {
+            professionCode = "Doctor"
+        } else if profession.contains("Therapist") {
+            professionCode = "Therapist"
+        } else {
+            professionCode = "Other"
+        }
+        
+        // Call the API
+        Task {
+            do {
+                let response = try await APIService.shared.signUp(
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    password: password,
+                    phoneNumber: phone.isEmpty ? nil : phone,
+                    profession: professionCode,
+                    licenseNumber: license.isEmpty ? nil : license
+                )
+                
+                // Store auth token securely
+                UserDefaults.standard.set(response.token, forKey: "authToken")
+                UserDefaults.standard.set(response.user.email, forKey: "userEmail")
+                UserDefaults.standard.set(response.user.firstName, forKey: "userFirstName")
+                
+                await MainActor.run {
+                    isLoading = false
+                    alertMessage = "Account created successfully! Welcome to Yolku, \(response.user.firstName)!"
+                    showAlert = true
+                }
+            } catch let error as APIError {
+                await MainActor.run {
+                    isLoading = false
+                    alertMessage = error.localizedDescription
+                    showAlert = true
+                }
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    alertMessage = "Network error. Please check your connection and try again."
+                    showAlert = true
+                }
+            }
+        }
     }
 }
 

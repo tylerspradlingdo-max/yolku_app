@@ -1,0 +1,43 @@
+//
+//  APIConfig.swift
+//  YolkuApp
+//
+//  API Configuration for Yolku Backend
+//
+
+import Foundation
+
+struct APIConfig {
+    // MARK: - Base URL
+    
+    // Production Heroku URL
+    static let productionURL = "https://yolku-9fce1d1d1bb6.herokuapp.com"
+    
+    // Local development URL
+    static let developmentURL = "http://localhost:3000"
+    
+    // Current environment - change this to switch between prod and dev
+    #if DEBUG
+    static let baseURL = developmentURL
+    #else
+    static let baseURL = productionURL
+    #endif
+    
+    // MARK: - API Endpoints
+    
+    static let apiPath = "/api"
+    
+    struct Auth {
+        static let signIn = "\(baseURL)\(apiPath)/auth/signin"
+        static let signUp = "\(baseURL)\(apiPath)/auth/signup"
+        static let verify = "\(baseURL)\(apiPath)/auth/verify"
+    }
+    
+    struct Users {
+        static let profile = "\(baseURL)\(apiPath)/users/profile"
+    }
+    
+    struct Health {
+        static let check = "\(baseURL)\(apiPath)/health"
+    }
+}

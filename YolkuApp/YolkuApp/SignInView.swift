@@ -14,6 +14,7 @@ struct SignInView: View {
     @State private var password = ""
     @State private var showAlert = false
     @State private var alertMessage = ""
+    @State private var isLoading = false
     
     var body: some View {
         NavigationView {
@@ -104,20 +105,28 @@ struct SignInView: View {
                             
                             // Sign In Button
                             Button(action: handleSignIn) {
-                                Text("Sign In")
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                                    .background(
-                                        LinearGradient(
-                                            colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .cornerRadius(25)
+                                if isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 16)
+                                } else {
+                                    Text("Sign In")
+                                        .font(.system(size: 18, weight: .semibold))
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 16)
+                                }
                             }
+                            .background(
+                                LinearGradient(
+                                    colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(25)
+                            .disabled(isLoading)
                             .padding(.horizontal, 32)
                             .padding(.top, 10)
                             
@@ -192,9 +201,40 @@ struct SignInView: View {
             return
         }
         
-        // Here you would typically send the credentials to your backend
-        alertMessage = "Sign in successful! Welcome back to Yolku!"
-        showAlert = true
+        isLoading = true
+        
+        // Call the API
+        Task {
+            do {
+                let response = try await APIService.shared.signIn(
+                    email: email,
+                    password: password
+                )
+                
+                // Store auth token securely
+                UserDefaults.standard.set(response.token, forKey: "authToken")
+                UserDefaults.standard.set(response.user.email, forKey: "userEmail")
+                UserDefaults.standard.set(response.user.firstName, forKey: "userFirstName")
+                
+                await MainActor.run {
+                    isLoading = false
+                    alertMessage = "Sign in successful! Welcome back, \(response.user.firstName)!"
+                    showAlert = true
+                }
+            } catch let error as APIError {
+                await MainActor.run {
+                    isLoading = false
+                    alertMessage = error.localizedDescription
+                    showAlert = true
+                }
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    alertMessage = "Network error. Please check your connection and try again."
+                    showAlert = true
+                }
+            }
+        }
     }
 }
 
