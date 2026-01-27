@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct ProfileView: View {
     let firstName: String
@@ -13,28 +14,56 @@ struct ProfileView: View {
     let profession: String
     let onLogout: () -> Void
     
+    @State private var selectedImage: UIImage?
+    @State private var showingImagePicker = false
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
                     // Profile Header
                     VStack(spacing: 16) {
-                        // Profile Picture Placeholder
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 100, height: 100)
-                            
-                            Text(firstName.prefix(1).uppercased())
-                                .font(.system(size: 40, weight: .bold))
-                                .foregroundColor(.white)
+                        // Profile Picture with Upload
+                        Button(action: { showingImagePicker = true }) {
+                            ZStack(alignment: .bottomTrailing) {
+                                // Profile Image or Placeholder
+                                if let selectedImage = selectedImage {
+                                    Image(uiImage: selectedImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 100, height: 100)
+                                        .clipShape(Circle())
+                                } else {
+                                    Circle()
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
+                                        .frame(width: 100, height: 100)
+                                    
+                                    Text(firstName.prefix(1).uppercased())
+                                        .font(.system(size: 40, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
+                                
+                                // Camera Icon Overlay
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 32, height: 32)
+                                    
+                                    Image(systemName: "camera.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(Color(hex: "667eea"))
+                                }
+                                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                                .offset(x: -2, y: -2)
+                            }
                         }
+                        .buttonStyle(PlainButtonStyle())
                         
                         VStack(spacing: 4) {
                             Text(firstName)
@@ -131,6 +160,77 @@ struct ProfileView: View {
             .background(Color(hex: "f5f5f5"))
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showingImagePicker) {
+                ImagePicker(selectedImage: $selectedImage)
+            }
+            .onAppear {
+                loadProfileImage()
+            }
+        }
+    }
+    
+    // Load saved profile image
+    private func loadProfileImage() {
+        if let imageData = UserDefaults.standard.data(forKey: "profileImage"),
+           let uiImage = UIImage(data: imageData) {
+            selectedImage = uiImage
+        }
+    }
+    
+    // Save profile image
+    private func saveProfileImage(_ image: UIImage) {
+        if let imageData = image.jpegData(compressionQuality: 0.7) {
+            UserDefaults.standard.set(imageData, forKey: "profileImage")
+        }
+    }
+}
+
+// Image Picker using UIKit
+struct ImagePicker: UIViewControllerRepresentable {
+    @Binding var selectedImage: UIImage?
+    @Environment(\.dismiss) var dismiss
+    
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.delegate = context.coordinator
+        picker.sourceType = .photoLibrary
+        picker.allowsEditing = true
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let parent: ImagePicker
+        
+        init(_ parent: ImagePicker) {
+            self.parent = parent
+        }
+        
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let editedImage = info[.editedImage] as? UIImage {
+                parent.selectedImage = editedImage
+                saveImage(editedImage)
+            } else if let originalImage = info[.originalImage] as? UIImage {
+                parent.selectedImage = originalImage
+                saveImage(originalImage)
+            }
+            
+            parent.dismiss()
+        }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.dismiss()
+        }
+        
+        private func saveImage(_ image: UIImage) {
+            if let imageData = image.jpegData(compressionQuality: 0.7) {
+                UserDefaults.standard.set(imageData, forKey: "profileImage")
+            }
         }
     }
 }
