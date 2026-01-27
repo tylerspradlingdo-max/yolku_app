@@ -44,13 +44,26 @@
         }
 
         .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             font-size: 1.8rem;
             font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            cursor: pointer;
         }
 
         .nav-links {
@@ -464,7 +477,24 @@
     <!-- Header -->
     <header>
         <nav>
-            <div class="logo">Yolku</div>
+            <a href="#" class="logo">
+                <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <!-- Letter Y with stethoscope design -->
+                    <path d="M 30 15 L 50 50 L 70 15" stroke="url(#logoGradient)" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="50" y1="50" x2="50" y2="75" stroke="url(#logoGradient)" stroke-width="8" stroke-linecap="round"/>
+                    <!-- Heart/pulse at bottom -->
+                    <path d="M 35 75 Q 40 85, 50 90 Q 60 85, 65 75" fill="url(#logoGradient)"/>
+                    <!-- Medical cross accent -->
+                    <circle cx="50" cy="75" r="6" fill="url(#logoGradient)"/>
+                </svg>
+                <span class="logo-text">Yolku</span>
+            </a>
             <div class="menu-toggle" id="menuToggle">
                 <span></span>
                 <span></span>
