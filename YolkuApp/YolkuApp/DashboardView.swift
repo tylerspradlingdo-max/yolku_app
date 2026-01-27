@@ -81,6 +81,8 @@ struct HomeTabView: View {
     let firstName: String
     let profession: String
     
+    @State private var showingAvailability = false
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -140,11 +142,23 @@ struct HomeTabView: View {
                                 color: Color(hex: "764ba2")
                             )
                             
+                            Button(action: {
+                                showingAvailability = true
+                            }) {
+                                ActionButton(
+                                    icon: "calendar.badge.plus",
+                                    title: "My Availability",
+                                    subtitle: "Set dates you're available to work",
+                                    color: Color(hex: "667eea")
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            
                             ActionButton(
                                 icon: "envelope.fill",
                                 title: "Messages",
                                 subtitle: "Chat with facilities",
-                                color: Color(hex: "667eea")
+                                color: Color(hex: "764ba2")
                             )
                         }
                         .padding(.horizontal, 24)
@@ -189,6 +203,9 @@ struct HomeTabView: View {
                             )
                         )
                 }
+            }
+            .sheet(isPresented: $showingAvailability) {
+                AvailabilityView()
             }
         }
     }
