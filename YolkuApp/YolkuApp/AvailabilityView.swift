@@ -15,6 +15,7 @@ struct AvailabilityDate: Identifiable, Codable {
     var startTime: Date?
     var endTime: Date?
     var notes: String
+    var selectedStates: [String]
     var createdAt: Date
     
     var formattedDate: String {
@@ -32,6 +33,16 @@ struct AvailabilityDate: Identifiable, Codable {
             return "\(formatter.string(from: start)) - \(formatter.string(from: end))"
         }
         return "All Day"
+    }
+    
+    var statesString: String {
+        if selectedStates.isEmpty {
+            return "No states selected"
+        } else if selectedStates.count <= 3 {
+            return selectedStates.joined(separator: ", ")
+        } else {
+            return "\(selectedStates.prefix(3).joined(separator: ", ")) +\(selectedStates.count - 3) more"
+        }
     }
 }
 
@@ -223,6 +234,15 @@ struct AvailabilityCard: View {
                     .font(.subheadline)
                     .foregroundColor(Color(hex: "667eea"))
                 
+                HStack(spacing: 4) {
+                    Image(systemName: "map.fill")
+                        .font(.caption)
+                        .foregroundColor(Color(hex: "764ba2"))
+                    Text(availability.statesString)
+                        .font(.caption)
+                        .foregroundColor(Color(hex: "764ba2"))
+                }
+                
                 if !availability.notes.isEmpty {
                     Text(availability.notes)
                         .font(.caption)
@@ -267,6 +287,21 @@ struct AddAvailabilityView: View {
     @State private var startTime = Date()
     @State private var endTime = Date()
     @State private var notes = ""
+    @State private var selectedStates: Set<String> = []
+    
+    // US States list
+    private let usStates = [
+        "Alabama", "Alaska", "Arizona", "Arkansas", "California",
+        "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
+        "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
+        "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+        "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
+        "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+        "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+        "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
+        "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
+        "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+    ]
     
     var body: some View {
         NavigationView {
@@ -282,6 +317,42 @@ struct AddAvailabilityView: View {
                     if !isFullDay {
                         DatePicker("Start Time", selection: $startTime, displayedComponents: .hourAndMinute)
                         DatePicker("End Time", selection: $endTime, displayedComponents: .hourAndMinute)
+                    }
+                }
+                
+                Section(header: HStack {
+                    Text("Available States")
+                    Spacer()
+                    if !selectedStates.isEmpty {
+                        Text("(\(selectedStates.count) selected)")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                }) {
+                    if selectedStates.isEmpty {
+                        Text("No states selected")
+                            .foregroundColor(.gray)
+                            .italic()
+                    } else {
+                        ForEach(Array(selectedStates).sorted(), id: \.self) { state in
+                            HStack {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(Color(hex: "667eea"))
+                                Text(state)
+                                Spacer()
+                                Button(action: {
+                                    selectedStates.remove(state)
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        }
+                    }
+                    
+                    NavigationLink(destination: StateSelectionView(selectedStates: $selectedStates, states: usStates)) {
+                        Label(selectedStates.isEmpty ? "Select States" : "Modify States", systemImage: "map")
+                            .foregroundColor(Color(hex: "667eea"))
                     }
                 }
                 
@@ -305,6 +376,7 @@ struct AddAvailabilityView: View {
                     }
                     .fontWeight(.semibold)
                     .foregroundColor(Color(hex: "667eea"))
+                    .disabled(selectedStates.isEmpty)
                 }
             }
         }
@@ -317,10 +389,72 @@ struct AddAvailabilityView: View {
             startTime: isFullDay ? nil : startTime,
             endTime: isFullDay ? nil : endTime,
             notes: notes,
+            selectedStates: Array(selectedStates),
             createdAt: Date()
         )
         
         onSave(newAvailability)
         dismiss()
+    }
+}
+
+// MARK: - State Selection View
+struct StateSelectionView: View {
+    @Environment(\.dismiss) var dismiss
+    @Binding var selectedStates: Set<String>
+    let states: [String]
+    
+    @State private var searchText = ""
+    
+    var filteredStates: [String] {
+        if searchText.isEmpty {
+            return states
+        } else {
+            return states.filter { $0.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
+    
+    var body: some View {
+        List {
+            Section {
+                ForEach(filteredStates, id: \.self) { state in
+                    Button(action: {
+                        if selectedStates.contains(state) {
+                            selectedStates.remove(state)
+                        } else {
+                            selectedStates.insert(state)
+                        }
+                    }) {
+                        HStack {
+                            Text(state)
+                                .foregroundColor(.primary)
+                            Spacer()
+                            if selectedStates.contains(state) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(Color(hex: "667eea"))
+                            } else {
+                                Image(systemName: "circle")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                }
+            } header: {
+                if !selectedStates.isEmpty {
+                    Text("\(selectedStates.count) state\(selectedStates.count == 1 ? "" : "s") selected")
+                }
+            }
+        }
+        .searchable(text: $searchText, prompt: "Search states")
+        .navigationTitle("Select States")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Done") {
+                    dismiss()
+                }
+                .foregroundColor(Color(hex: "667eea"))
+            }
+        }
     }
 }
