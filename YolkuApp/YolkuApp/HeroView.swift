@@ -17,7 +17,7 @@ struct HeroView: View {
             )
             
             VStack(spacing: 20) {
-                Text("Welcome to Yolku")
+                Text("Yolku")
                     .font(.system(size: 42, weight: .bold))
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
@@ -29,13 +29,13 @@ struct HeroView: View {
                     .padding(.horizontal, 40)
                 
                 HStack(spacing: 16) {
-                    Button("Download Now") {
-                        // Download action
+                    Button("I'm a Healthcare Worker") {
+                        // Healthcare worker action
                     }
                     .buttonStyle(WhiteButtonStyle())
                     
-                    Button("Learn More") {
-                        // Learn more action
+                    Button("I'm a Healthcare Facility") {
+                        // Healthcare facility action
                     }
                     .buttonStyle(OutlineWhiteButtonStyle())
                 }
