@@ -38,17 +38,10 @@ struct ContentView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 12) {
-                        Button("Sign In") {
-                            showSignIn = true
-                        }
-                        .buttonStyle(OutlineButtonStyle())
-                        
-                        Button("Sign Up") {
-                            // Sign up action
-                        }
-                        .buttonStyle(GradientButtonStyle())
+                    Button("Sign In") {
+                        showSignIn = true
                     }
+                    .buttonStyle(OutlineButtonStyle())
                 }
             }
             .sheet(isPresented: $showSignIn) {
