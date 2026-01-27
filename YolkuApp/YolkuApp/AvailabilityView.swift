@@ -18,6 +18,11 @@ struct AvailabilityDate: Identifiable, Codable {
     var selectedStates: [String]
     var createdAt: Date
     
+    // Coding keys for Codable conformance
+    enum CodingKeys: String, CodingKey {
+        case id, date, isFullDay, startTime, endTime, notes, selectedStates, createdAt
+    }
+    
     // Initialize with default empty array for backward compatibility
     init(id: UUID = UUID(), date: Date, isFullDay: Bool, startTime: Date? = nil, endTime: Date? = nil, notes: String, selectedStates: [String] = [], createdAt: Date) {
         self.id = id
@@ -67,7 +72,7 @@ struct AvailabilityDate: Identifiable, Codable {
         } else if selectedStates.count <= 3 {
             return selectedStates.joined(separator: ", ")
         } else {
-            return "\(selectedStates.prefix(3).joined(separator: ", ")) +\(selectedStates.count - 3) more"
+            return "\(selectedStates.prefix(3).joined(separator: ", ")) + \(selectedStates.count - 3) more"
         }
     }
 }
@@ -392,10 +397,6 @@ struct AddAvailabilityView: View {
                 }
             }
         }
-    }
-    
-    private var isTimeRangeValid: Bool {
-        return isFullDay || endTime > startTime
     }
     
     private func saveAvailability() {
