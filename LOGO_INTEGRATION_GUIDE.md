@@ -36,7 +36,7 @@ You'll need your logo in the following formats:
    ```
 
 2. Update `index.html`:
-   - Find the logo section (around line 487)
+   - Find the logo section (around line 495)
    - Uncomment this line:
      ```html
      <img src="assets/images/logo.png" alt="Yolku" class="logo-icon logo-image">
@@ -74,7 +74,7 @@ You'll need your logo in the following formats:
    - Uncomment the Image logo code
    - Comment out the Text logo code
    
-   - Open `HeroView.swift` (line 21-26)  
+   - Open `HeroView.swift` (line 22-33)  
    - Uncomment the Image logo code
    - Comment out the Text logo code
 
@@ -150,7 +150,7 @@ Image("AppLogo")
 // Text("Yolku")...
 ```
 
-**HeroView.swift** (around line 21-26):
+**HeroView.swift** (around line 22-33):
 ```swift
 // Uncomment to use image logo:
 Image("AppLogo")

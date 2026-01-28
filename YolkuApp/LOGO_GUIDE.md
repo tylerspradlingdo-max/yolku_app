@@ -89,8 +89,8 @@ Simply upload your 1024x1024px logo and download the generated icons.
 
 ## Current State
 
-✅ Code is ready to support image logos
-✅ CSS/styling is in place
+✅ SwiftUI code is ready to support image logos
+✅ Image view styling is in place
 ⚠️ Logo image files need to be added to Assets.xcassets
 
 ## Need Help?
