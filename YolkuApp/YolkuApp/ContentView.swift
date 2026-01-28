@@ -34,6 +34,7 @@ struct ContentView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(height: 30)
+                            .accessibilityLabel("Yolku logo")
                     }
                     
                     ToolbarItem(placement: .navigationBarTrailing) {

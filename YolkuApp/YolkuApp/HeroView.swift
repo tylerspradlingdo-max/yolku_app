@@ -24,6 +24,7 @@ struct HeroView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(height: 60)
+                    .accessibilityLabel("Yolku logo")
                 
                 Text("Connecting medical professionals with healthcare facilities")
                     .font(.system(size: 18))
