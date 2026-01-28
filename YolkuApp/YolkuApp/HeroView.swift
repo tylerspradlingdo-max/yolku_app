@@ -19,12 +19,9 @@ struct HeroView: View {
             )
             
             VStack(spacing: 20) {
-                // LOGO: Using image logo from Assets.xcassets
-                Image("AppLogo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 60)
-                    .accessibilityLabel("Yolku logo")
+                Text("Yolku")
+                    .font(.system(size: 42, weight: .bold))
+                    .foregroundColor(.white)
                 
                 Text("Connecting medical professionals with healthcare facilities")
                     .font(.system(size: 18))
