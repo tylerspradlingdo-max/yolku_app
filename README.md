@@ -167,15 +167,13 @@ See [XCODE_GUIDE.md](XCODE_GUIDE.md) for comprehensive iOS development instructi
 
 #### GitHub Pages
 
-### GitHub Pages
-
 1. Go to your repository settings
 2. Navigate to "Pages" section
 3. Select source branch (main/master)
 4. Save and wait for deployment
 5. Your site will be available at `https://[username].github.io/yolku_app/`
 
-### Netlify
+#### Netlify
 
 1. Sign up for a free [Netlify](https://www.netlify.com/) account
 2. Click "New site from Git"
@@ -186,7 +184,7 @@ See [XCODE_GUIDE.md](XCODE_GUIDE.md) for comprehensive iOS development instructi
 **Or use Netlify Drop:**
 - Drag and drop the project folder to [Netlify Drop](https://app.netlify.com/drop)
 
-### Vercel
+#### Vercel
 
 1. Sign up for a free [Vercel](https://vercel.com/) account
 2. Install Vercel CLI:
