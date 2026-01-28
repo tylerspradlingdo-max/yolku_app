@@ -62,6 +62,7 @@ yolku_app/
 ├── README.md               # Main project documentation
 ├── LICENSE                 # MIT License
 ├── XCODE_GUIDE.md         # Complete guide for iOS app development
+├── BRANCH_GUIDE.md        # Branch management guide for Xcode
 └── YolkuApp/              # Native iOS app (SwiftUI)
     ├── README.md          # iOS-specific documentation
     ├── .gitignore         # Xcode gitignore
