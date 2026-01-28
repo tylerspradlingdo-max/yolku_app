@@ -11,6 +11,7 @@ import SwiftUI
 struct AvailabilityDate: Identifiable, Codable {
     var id = UUID()
     var date: Date
+    var endDate: Date? // For date ranges
     var isFullDay: Bool
     var startTime: Date?
     var endTime: Date?
@@ -20,13 +21,14 @@ struct AvailabilityDate: Identifiable, Codable {
     
     // Coding keys for Codable conformance
     enum CodingKeys: String, CodingKey {
-        case id, date, isFullDay, startTime, endTime, notes, selectedStates, createdAt
+        case id, date, endDate, isFullDay, startTime, endTime, notes, selectedStates, createdAt
     }
     
     // Initialize with default empty array for backward compatibility
-    init(id: UUID = UUID(), date: Date, isFullDay: Bool, startTime: Date? = nil, endTime: Date? = nil, notes: String, selectedStates: [String] = [], createdAt: Date) {
+    init(id: UUID = UUID(), date: Date, endDate: Date? = nil, isFullDay: Bool, startTime: Date? = nil, endTime: Date? = nil, notes: String, selectedStates: [String] = [], createdAt: Date) {
         self.id = id
         self.date = date
+        self.endDate = endDate
         self.isFullDay = isFullDay
         self.startTime = startTime
         self.endTime = endTime
@@ -40,6 +42,7 @@ struct AvailabilityDate: Identifiable, Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(UUID.self, forKey: .id)
         date = try container.decode(Date.self, forKey: .date)
+        endDate = try container.decodeIfPresent(Date.self, forKey: .endDate)
         isFullDay = try container.decode(Bool.self, forKey: .isFullDay)
         startTime = try container.decodeIfPresent(Date.self, forKey: .startTime)
         endTime = try container.decodeIfPresent(Date.self, forKey: .endTime)
@@ -52,7 +55,18 @@ struct AvailabilityDate: Identifiable, Codable {
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
-        return formatter.string(from: date)
+        
+        if let end = endDate {
+            // Date range - show even if same day to indicate it was selected as a range
+            if Calendar.current.isDate(date, inSameDayAs: end) {
+                return formatter.string(from: date)
+            } else {
+                return "\(formatter.string(from: date)) - \(formatter.string(from: end))"
+            }
+        } else {
+            // Single date
+            return formatter.string(from: date)
+        }
     }
     
     var timeRange: String {
@@ -313,7 +327,9 @@ struct AddAvailabilityView: View {
     @Environment(\.dismiss) var dismiss
     let onSave: (AvailabilityDate) -> Void
     
+    @State private var isDateRange = false
     @State private var selectedDate = Date()
+    @State private var selectedEndDate = Date()
     @State private var isFullDay = true
     @State private var startTime = Date()
     @State private var endTime = Date()
@@ -324,8 +340,28 @@ struct AddAvailabilityView: View {
         NavigationView {
             Form {
                 Section(header: Text("Date")) {
-                    DatePicker("Select Date", selection: $selectedDate, in: Date()..., displayedComponents: .date)
+                    Toggle("Date Range", isOn: $isDateRange)
+                        .tint(Color(hex: "667eea"))
+                        .onChange(of: isDateRange) { _, newValue in
+                            // Initialize end date when switching to date range mode
+                            if newValue && selectedEndDate < selectedDate {
+                                selectedEndDate = selectedDate
+                            }
+                        }
+                    
+                    DatePicker(isDateRange ? "Start Date" : "Select Date", selection: $selectedDate, in: Date()..., displayedComponents: .date)
                         .datePickerStyle(.graphical)
+                        .onChange(of: selectedDate) { _, newValue in
+                            // Ensure end date is always >= start date
+                            if isDateRange && selectedEndDate < newValue {
+                                selectedEndDate = newValue
+                            }
+                        }
+                    
+                    if isDateRange {
+                        DatePicker("End Date", selection: $selectedEndDate, in: selectedDate..., displayedComponents: .date)
+                            .datePickerStyle(.graphical)
+                    }
                 }
                 
                 Section(header: Text("Time")) {
@@ -402,6 +438,7 @@ struct AddAvailabilityView: View {
     private func saveAvailability() {
         let newAvailability = AvailabilityDate(
             date: selectedDate,
+            endDate: isDateRange ? selectedEndDate : nil,
             isFullDay: isFullDay,
             startTime: isFullDay ? nil : startTime,
             endTime: isFullDay ? nil : endTime,

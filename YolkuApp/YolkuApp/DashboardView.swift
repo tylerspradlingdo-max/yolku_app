@@ -248,36 +248,34 @@ struct ActionButton: View {
     let color: Color
     
     var body: some View {
-        Button(action: {}) {
-            HStack(spacing: 16) {
-                Image(systemName: icon)
-                    .font(.system(size: 24))
-                    .foregroundColor(color)
-                    .frame(width: 50, height: 50)
-                    .background(color.opacity(0.1))
-                    .cornerRadius(10)
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(color)
+                .frame(width: 50, height: 50)
+                .background(color.opacity(0.1))
+                .cornerRadius(10)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(hex: "333333"))
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(hex: "333333"))
-                    
-                    Text(subtitle)
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
+                Text(subtitle)
+                    .font(.system(size: 14))
                     .foregroundColor(.gray)
             }
-            .padding(16)
-            .background(Color.white)
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.gray)
         }
+        .padding(16)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
     }
 }
 
