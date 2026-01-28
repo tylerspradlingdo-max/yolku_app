@@ -39,6 +39,7 @@ struct ContentView: View {
                                     endPoint: .trailing
                                 )
                             )
+                            .accessibilityLabel("Yolku logo")
                     }
                     
                     ToolbarItem(placement: .navigationBarTrailing) {
