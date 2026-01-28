@@ -22,6 +22,7 @@ This repository contains both a **web landing page** (HTML/CSS/JavaScript) and a
 - **Location**: `YolkuApp/` directory
 - **Technology**: SwiftUI, iOS 17+
 - **Deployment**: App Store, TestFlight
+- **Recommended Branch**: `main` (for stable development)
 - **Open in Xcode**: `open YolkuApp/YolkuApp.xcodeproj`
 - **Documentation**: See [XCODE_GUIDE.md](XCODE_GUIDE.md)
 
@@ -132,18 +133,24 @@ yolku_app/
    cd yolku_app
    ```
 
-2. **Open the Xcode project**
+2. **Ensure you're on the main branch**
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
+
+3. **Open the Xcode project**
    ```bash
    cd YolkuApp
    open YolkuApp.xcodeproj
    ```
 
-3. **Build and run**
+4. **Build and run**
    - Select a simulator (iPhone 15 Pro recommended) from the scheme menu
    - Press ⌘R to build and run
    - The app will launch in the simulator
 
-4. **Explore the code**
+5. **Explore the code**
    - All SwiftUI views are in `YolkuApp/YolkuApp/`
    - Each section is a separate view file
    - Press ⌘⌥↩ to see live previews

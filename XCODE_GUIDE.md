@@ -4,6 +4,28 @@
 
 This document explains how to open and work with the native iOS SwiftUI implementation of the Yolku landing page.
 
+## Which Branch to Use
+
+**For Xcode development, use the `main` branch.**
+
+The `main` branch contains the stable, production-ready version of the iOS app. When cloning or pulling the repository for Xcode development:
+
+```bash
+# Clone the repository
+git clone https://github.com/tylerspradlingdo-max/yolku_app.git
+cd yolku_app
+
+# Ensure you're on the main branch
+git checkout main
+git pull origin main
+
+# Open the Xcode project
+cd YolkuApp
+open YolkuApp.xcodeproj
+```
+
+> **Note**: If you're working on a feature branch, make sure to regularly merge or rebase from `main` to stay up to date.
+
 ## Quick Start
 
 ### Opening in Xcode
