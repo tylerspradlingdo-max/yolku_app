@@ -22,7 +22,7 @@ This repository contains both a **web landing page** (HTML/CSS/JavaScript) and a
 - **Location**: `YolkuApp/` directory
 - **Technology**: SwiftUI, iOS 17+
 - **Deployment**: App Store, TestFlight
-- **Recommended Branch**: `main` (for stable development)
+- **Recommended Branch**: `main` (for stable development) - [See branch guide](BRANCH_GUIDE.md)
 - **Open in Xcode**: `open YolkuApp/YolkuApp.xcodeproj`
 - **Documentation**: See [XCODE_GUIDE.md](XCODE_GUIDE.md)
 

@@ -25,6 +25,8 @@ open YolkuApp.xcodeproj
 ```
 
 > **Note**: If you're working on a feature branch, make sure to regularly merge or rebase from `main` to stay up to date.
+> 
+> For more detailed branch management instructions, see [BRANCH_GUIDE.md](../BRANCH_GUIDE.md).
 
 ## Quick Start
 
