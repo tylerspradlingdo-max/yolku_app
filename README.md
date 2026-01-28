@@ -136,9 +136,7 @@ yolku_app/
 
 2. **Ensure you're on the main branch**
    ```bash
-   # Save any uncommitted changes first if needed
-   # git stash
-   
+   # If you have uncommitted changes, see BRANCH_GUIDE.md for proper stash workflow
    git checkout main
    git pull origin main
    ```
