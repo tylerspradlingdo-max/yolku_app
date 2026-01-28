@@ -19,6 +19,14 @@ struct HeroView: View {
             )
             
             VStack(spacing: 20) {
+                // LOGO OPTIONS:
+                // Option 1: Use image logo (uncomment when you add logo to Assets.xcassets)
+                // Image("AppLogo")
+                //     .resizable()
+                //     .scaledToFit()
+                //     .frame(height: 60)
+                
+                // Option 2: Use text logo (current default)
                 Text("Yolku")
                     .font(.system(size: 42, weight: .bold))
                     .foregroundColor(.white)

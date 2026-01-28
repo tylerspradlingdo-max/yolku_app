@@ -29,6 +29,14 @@ struct ContentView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
+                        // LOGO OPTIONS:
+                        // Option 1: Use image logo (uncomment when you add logo to Assets.xcassets)
+                        // Image("AppLogo")
+                        //     .resizable()
+                        //     .scaledToFit()
+                        //     .frame(height: 30)
+                        
+                        // Option 2: Use text logo (current default)
                         Text("Yolku")
                             .font(.title2)
                             .fontWeight(.bold)
