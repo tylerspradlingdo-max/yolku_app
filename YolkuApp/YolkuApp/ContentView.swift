@@ -29,11 +29,16 @@ struct ContentView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        // LOGO: Using image logo from Assets.xcassets
-                        Image("AppLogo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 30)
+                        Text("Yolku")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
                             .accessibilityLabel("Yolku logo")
                     }
                     
