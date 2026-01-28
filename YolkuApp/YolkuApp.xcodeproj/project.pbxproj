@@ -19,6 +19,15 @@
 		A1000019000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1000020000000000000001 /* Assets.xcassets */; };
 		A1000021000000000000002 /* HealthcareWorkerSignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000022000000000000002 /* HealthcareWorkerSignUpView.swift */; };
 		A1000023000000000000003 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000024000000000000003 /* SignInView.swift */; };
+		A1000025000000000000004 /* APIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000026000000000000004 /* APIConfig.swift */; };
+		A1000027000000000000005 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000028000000000000005 /* APIService.swift */; };
+		A1000029000000000000006 /* AvailabilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000030000000000000006 /* AvailabilityView.swift */; };
+		A1000031000000000000007 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000032000000000000007 /* Constants.swift */; };
+		A1000033000000000000008 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000034000000000000008 /* DashboardView.swift */; };
+		A1000035000000000000009 /* DocumentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000036000000000000009 /* DocumentsView.swift */; };
+		A1000037000000000000010 /* MyShiftsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000038000000000000010 /* MyShiftsView.swift */; };
+		A1000039000000000000011 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000040000000000000011 /* ProfileView.swift */; };
+		A1000041000000000000012 /* ShiftsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000042000000000000012 /* ShiftsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +44,15 @@
 		A1000020000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1000022000000000000002 /* HealthcareWorkerSignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthcareWorkerSignUpView.swift; sourceTree = "<group>"; };
 		A1000024000000000000003 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		A1000026000000000000004 /* APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConfig.swift; sourceTree = "<group>"; };
+		A1000028000000000000005 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
+		A1000030000000000000006 /* AvailabilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailabilityView.swift; sourceTree = "<group>"; };
+		A1000032000000000000007 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		A1000034000000000000008 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		A1000036000000000000009 /* DocumentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsView.swift; sourceTree = "<group>"; };
+		A1000038000000000000010 /* MyShiftsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyShiftsView.swift; sourceTree = "<group>"; };
+		A1000040000000000000011 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		A1000042000000000000012 /* ShiftsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShiftsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +86,15 @@
 				A1000014000000000000001 /* FooterView.swift */,
 				A1000022000000000000002 /* HealthcareWorkerSignUpView.swift */,
 				A1000024000000000000003 /* SignInView.swift */,
+				A1000026000000000000004 /* APIConfig.swift */,
+				A1000028000000000000005 /* APIService.swift */,
+				A1000030000000000000006 /* AvailabilityView.swift */,
+				A1000032000000000000007 /* Constants.swift */,
+				A1000034000000000000008 /* DashboardView.swift */,
+				A1000036000000000000009 /* DocumentsView.swift */,
+				A1000038000000000000010 /* MyShiftsView.swift */,
+				A1000040000000000000011 /* ProfileView.swift */,
+				A1000042000000000000012 /* ShiftsView.swift */,
 				A1000016000000000000001 /* ColorExtension.swift */,
 				A1000018000000000000001 /* ButtonStyles.swift */,
 				A1000020000000000000001 /* Assets.xcassets */,
@@ -160,6 +187,15 @@
 				A1000013000000000000001 /* FooterView.swift in Sources */,
 				A1000021000000000000002 /* HealthcareWorkerSignUpView.swift in Sources */,
 				A1000023000000000000003 /* SignInView.swift in Sources */,
+				A1000025000000000000004 /* APIConfig.swift in Sources */,
+				A1000027000000000000005 /* APIService.swift in Sources */,
+				A1000029000000000000006 /* AvailabilityView.swift in Sources */,
+				A1000031000000000000007 /* Constants.swift in Sources */,
+				A1000033000000000000008 /* DashboardView.swift in Sources */,
+				A1000035000000000000009 /* DocumentsView.swift in Sources */,
+				A1000037000000000000010 /* MyShiftsView.swift in Sources */,
+				A1000039000000000000011 /* ProfileView.swift in Sources */,
+				A1000041000000000000012 /* ShiftsView.swift in Sources */,
 				A1000015000000000000001 /* ColorExtension.swift in Sources */,
 				A1000017000000000000001 /* ButtonStyles.swift in Sources */,
 				A1000001000000000000001 /* YolkuAppApp.swift in Sources */,
