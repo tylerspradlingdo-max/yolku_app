@@ -58,8 +58,9 @@ git stash
 git checkout main
 git pull origin main
 
-# Restore your work if needed
-git stash pop
+# Restore your work if needed (may require conflict resolution)
+git stash apply
+# Or use 'git stash pop' to remove from stash after applying
 ```
 
 **Q: How do I know which branch I'm on?**
