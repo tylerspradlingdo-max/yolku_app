@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const healthRoutes = require('./routes/health');
+const positionsRoutes = require('./routes/positions');
 
 // Middleware
 app.use(helmet()); // Security headers
@@ -28,6 +29,7 @@ app.use(morgan('combined')); // Logging
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/positions', positionsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -38,7 +40,8 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/api/health',
       auth: '/api/auth',
-      users: '/api/users'
+      users: '/api/users',
+      positions: '/api/positions'
     }
   });
 });

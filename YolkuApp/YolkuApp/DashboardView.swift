@@ -19,7 +19,7 @@ struct DashboardView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             // Home Tab - Dashboard
-            HomeTabView(firstName: userFirstName, profession: userProfession)
+            HomeTabView(firstName: userFirstName, profession: userProfession, selectedTab: $selectedTab)
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
                 }
@@ -82,6 +82,7 @@ struct HomeTabView: View {
     let profession: String
     
     @State private var showingAvailability = false
+    @Binding var selectedTab: Int
     
     var body: some View {
         NavigationView {
@@ -128,12 +129,17 @@ struct HomeTabView: View {
                             .padding(.horizontal, 24)
                         
                         VStack(spacing: 12) {
-                            ActionButton(
-                                icon: "magnifyingglass",
-                                title: "Find Available Positions",
-                                subtitle: "Browse healthcare facilities near you",
-                                color: Color(hex: "667eea")
-                            )
+                            Button(action: {
+                                selectedTab = 1 // Navigate to Find Positions tab
+                            }) {
+                                ActionButton(
+                                    icon: "magnifyingglass",
+                                    title: "Find Available Positions",
+                                    subtitle: "Browse healthcare facilities near you",
+                                    color: Color(hex: "667eea")
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
                             
                             ActionButton(
                                 icon: "calendar",

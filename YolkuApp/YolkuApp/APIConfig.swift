@@ -46,4 +46,12 @@ struct APIConfig {
     struct Health {
         static let check = "\(baseURL)\(apiPath)/health"
     }
+    
+    struct Positions {
+        static let list = "\(baseURL)\(apiPath)/positions"
+        static let states = "\(baseURL)\(apiPath)/positions/states/list"
+        static func detail(id: String) -> String {
+            return "\(baseURL)\(apiPath)/positions/\(id)"
+        }
+    }
 }
