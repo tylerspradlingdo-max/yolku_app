@@ -397,10 +397,22 @@ struct DateRangeFilterSheet: View {
     let onApply: () -> Void
     @Environment(\.dismiss) var dismiss
     
+    private let defaultDateOffset: TimeInterval = 7 * 24 * 60 * 60 // 7 days in seconds
+    
     @State private var tempStartDate: Date = Date()
-    @State private var tempEndDate: Date = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+    @State private var tempEndDate: Date = Date()
     @State private var useStartDate = false
     @State private var useEndDate = false
+    
+    init(startDate: Binding<Date?>, endDate: Binding<Date?>, onApply: @escaping () -> Void) {
+        self._startDate = startDate
+        self._endDate = endDate
+        self.onApply = onApply
+        
+        // Initialize temp dates
+        self._tempStartDate = State(initialValue: Date())
+        self._tempEndDate = State(initialValue: Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date().addingTimeInterval(defaultDateOffset))
+    }
     
     var body: some View {
         NavigationView {

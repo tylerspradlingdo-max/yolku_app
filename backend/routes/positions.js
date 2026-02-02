@@ -80,6 +80,45 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * GET /api/positions/states/list
+ * Get list of unique states that have available positions
+ */
+router.get('/states/list', async (req, res) => {
+  try {
+    const facilities = await Facility.findAll({
+      attributes: ['state'],
+      include: [{
+        model: Position,
+        as: 'positions',
+        where: {
+          status: 'Open',
+          isActive: true
+        },
+        attributes: []
+      }],
+      group: ['Facility.state'],
+      raw: true
+    });
+    
+    const states = facilities.map(f => f.state).sort();
+    
+    res.json({
+      success: true,
+      data: states
+    });
+  } catch (error) {
+    console.error('Error fetching states:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Failed to fetch states',
+        details: error.message
+      }
+    });
+  }
+});
+
+/**
  * GET /api/positions/:id
  * Get a specific position by ID
  */
@@ -114,45 +153,6 @@ router.get('/:id', async (req, res) => {
       success: false,
       error: {
         message: 'Failed to fetch position',
-        details: error.message
-      }
-    });
-  }
-});
-
-/**
- * GET /api/positions/states/list
- * Get list of unique states that have available positions
- */
-router.get('/states/list', async (req, res) => {
-  try {
-    const facilities = await Facility.findAll({
-      attributes: ['state'],
-      include: [{
-        model: Position,
-        as: 'positions',
-        where: {
-          status: 'Open',
-          isActive: true
-        },
-        attributes: []
-      }],
-      group: ['Facility.state'],
-      raw: true
-    });
-    
-    const states = facilities.map(f => f.state).sort();
-    
-    res.json({
-      success: true,
-      data: states
-    });
-  } catch (error) {
-    console.error('Error fetching states:', error);
-    res.status(500).json({
-      success: false,
-      error: {
-        message: 'Failed to fetch states',
         details: error.message
       }
     });
