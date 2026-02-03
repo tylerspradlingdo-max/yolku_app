@@ -20,7 +20,12 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
+    
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not configured');
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Verify this is a facility token
     if (decoded.type !== 'facility') {
@@ -90,9 +95,13 @@ router.post('/signup', [
     });
 
     // Generate JWT token
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not configured');
+    }
+    
     const token = jwt.sign(
       { facilityId: facility.id, type: 'facility' },
-      process.env.JWT_SECRET || 'your_jwt_secret_key',
+      process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
 
@@ -162,9 +171,13 @@ router.post('/signin', [
     }
 
     // Generate JWT token
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not configured');
+    }
+    
     const token = jwt.sign(
       { facilityId: facility.id, type: 'facility' },
-      process.env.JWT_SECRET || 'your_jwt_secret_key',
+      process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
 

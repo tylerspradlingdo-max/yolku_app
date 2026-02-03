@@ -44,6 +44,7 @@ const Position = sequelize.define('Position', {
     type: DataTypes.TEXT,
     allowNull: true
   },
+  // Date range fields for permanent/long-term positions
   startDate: {
     type: DataTypes.DATEONLY,
     allowNull: false
@@ -52,6 +53,7 @@ const Position = sequelize.define('Position', {
     type: DataTypes.DATEONLY,
     allowNull: true
   },
+  // Legacy shift fields for single-day shift positions (optional)
   shiftDate: {
     type: DataTypes.DATEONLY,
     allowNull: true
@@ -64,6 +66,7 @@ const Position = sequelize.define('Position', {
     type: DataTypes.TIME,
     allowNull: true
   },
+  // Primary compensation field (annual salary or contract amount)
   salary: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
@@ -71,6 +74,7 @@ const Position = sequelize.define('Position', {
       min: 0
     }
   },
+  // Optional hourly rate for shift-based positions
   hourlyRate: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
