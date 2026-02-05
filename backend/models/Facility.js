@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const bcrypt = require('bcryptjs');
 
 const Facility = sequelize.define('Facility', {
   id: {
@@ -13,6 +14,23 @@ const Facility = sequelize.define('Facility', {
     validate: {
       notEmpty: true,
       len: [2, 200]
+    }
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true,
+      notEmpty: true
+    }
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [8, 100]
     }
   },
   address: {
@@ -62,7 +80,33 @@ const Facility = sequelize.define('Facility', {
   }
 }, {
   tableName: 'facilities',
-  timestamps: true
+  timestamps: true,
+  hooks: {
+    beforeCreate: async (facility) => {
+      if (facility.password) {
+        const salt = await bcrypt.genSalt(10);
+        facility.password = await bcrypt.hash(facility.password, salt);
+      }
+    },
+    beforeUpdate: async (facility) => {
+      if (facility.changed('password')) {
+        const salt = await bcrypt.genSalt(10);
+        facility.password = await bcrypt.hash(facility.password, salt);
+      }
+    }
+  }
 });
+
+// Instance method to compare passwords
+Facility.prototype.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Instance method to get public profile (hide password)
+Facility.prototype.toJSON = function() {
+  const values = Object.assign({}, this.get());
+  delete values.password;
+  return values;
+};
 
 module.exports = Facility;

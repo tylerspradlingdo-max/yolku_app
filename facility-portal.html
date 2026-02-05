@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facility Portal - Yolku</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .auth-forms {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-section {
+            flex: 1;
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .form-section h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            margin-top: 0.5rem;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .dashboard {
+            margin-top: 2rem;
+        }
+
+        .profile-section {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.875rem;
+        }
+
+        .info-value {
+            color: #333;
+            margin-top: 0.25rem;
+        }
+
+        .positions-section {
+            margin-top: 2rem;
+        }
+
+        .positions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .position-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .position-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .position-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-open {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-filled {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .position-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            width: auto;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .auth-forms {
+                flex-direction: column;
+            }
+            
+            .profile-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Healthcare Facility Portal</h1>
+            <p>Manage your facility profile and job positions</p>
+        </div>
+
+        <div class="content">
+            <!-- Auth Forms (shown when not logged in) -->
+            <div id="authSection" class="auth-forms">
+                <!-- Sign In Form -->
+                <div class="form-section">
+                    <h2>Sign In</h2>
+                    <form id="signinForm">
+                        <div class="form-group">
+                            <label for="signinEmail">Email</label>
+                            <input type="email" id="signinEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signinPassword">Password</label>
+                            <input type="password" id="signinPassword" required>
+                        </div>
+                        <button type="submit" class="btn">Sign In</button>
+                    </form>
+                </div>
+
+                <!-- Sign Up Form -->
+                <div class="form-section">
+                    <h2>Sign Up</h2>
+                    <form id="signupForm">
+                        <div class="form-group">
+                            <label for="name">Facility Name *</label>
+                            <input type="text" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password *</label>
+                            <input type="password" id="password" required minlength="8">
+                        </div>
+                        <div class="form-group">
+                            <label for="facilityType">Facility Type *</label>
+                            <select id="facilityType" required>
+                                <option value="">Select Type</option>
+                                <option value="Hospital">Hospital</option>
+                                <option value="Clinic">Clinic</option>
+                                <option value="Nursing Home">Nursing Home</option>
+                                <option value="Assisted Living">Assisted Living</option>
+                                <option value="Home Health">Home Health</option>
+                                <option value="Urgent Care">Urgent Care</option>
+                                <option value="Rehabilitation Center">Rehabilitation Center</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Address *</label>
+                            <input type="text" id="address" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City *</label>
+                            <input type="text" id="city" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State (2-letter code) *</label>
+                            <input type="text" id="state" required maxlength="2" pattern="[A-Za-z]{2}">
+                        </div>
+                        <div class="form-group">
+                            <label for="zipCode">Zip Code *</label>
+                            <input type="text" id="zipCode" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phoneNumber">Phone Number</label>
+                            <input type="tel" id="phoneNumber">
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description"></textarea>
+                        </div>
+                        <button type="submit" class="btn">Sign Up</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Dashboard (shown when logged in) -->
+            <div id="dashboard" class="dashboard hidden">
+                <!-- Profile Section -->
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <h2>Facility Profile</h2>
+                        <div>
+                            <button class="btn btn-small btn-secondary" onclick="editProfile()">Edit Profile</button>
+                            <button class="btn btn-small btn-danger" onclick="logout()">Logout</button>
+                        </div>
+                    </div>
+                    <div class="profile-info" id="profileInfo"></div>
+                </div>
+
+                <!-- Positions Section -->
+                <div class="positions-section">
+                    <div class="positions-header">
+                        <h2>Current Positions</h2>
+                        <button class="btn btn-small" onclick="showAddPositionModal()">+ Add Position</button>
+                    </div>
+                    <div id="positionsList"></div>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div id="alertContainer"></div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Profile</h2>
+                <button class="close-btn" onclick="closeEditProfileModal()">&times;</button>
+            </div>
+            <form id="editProfileForm">
+                <div class="form-group">
+                    <label for="editName">Facility Name</label>
+                    <input type="text" id="editName">
+                </div>
+                <div class="form-group">
+                    <label for="editFacilityType">Facility Type</label>
+                    <select id="editFacilityType">
+                        <option value="Hospital">Hospital</option>
+                        <option value="Clinic">Clinic</option>
+                        <option value="Nursing Home">Nursing Home</option>
+                        <option value="Assisted Living">Assisted Living</option>
+                        <option value="Home Health">Home Health</option>
+                        <option value="Urgent Care">Urgent Care</option>
+                        <option value="Rehabilitation Center">Rehabilitation Center</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editAddress">Address</label>
+                    <input type="text" id="editAddress">
+                </div>
+                <div class="form-group">
+                    <label for="editCity">City</label>
+                    <input type="text" id="editCity">
+                </div>
+                <div class="form-group">
+                    <label for="editState">State</label>
+                    <input type="text" id="editState" maxlength="2">
+                </div>
+                <div class="form-group">
+                    <label for="editZipCode">Zip Code</label>
+                    <input type="text" id="editZipCode">
+                </div>
+                <div class="form-group">
+                    <label for="editPhoneNumber">Phone Number</label>
+                    <input type="tel" id="editPhoneNumber">
+                </div>
+                <div class="form-group">
+                    <label for="editDescription">Description</label>
+                    <textarea id="editDescription"></textarea>
+                </div>
+                <button type="submit" class="btn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Position Modal -->
+    <div id="positionModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="positionModalTitle">Add Position</h2>
+                <button class="close-btn" onclick="closePositionModal()">&times;</button>
+            </div>
+            <form id="positionForm">
+                <input type="hidden" id="positionId">
+                <div class="form-group">
+                    <label for="positionTitle">Job Title *</label>
+                    <input type="text" id="positionTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="positionProfession">Profession *</label>
+                    <select id="positionProfession" required>
+                        <option value="">Select Profession</option>
+                        <option value="RN">RN (Registered Nurse)</option>
+                        <option value="LPN">LPN (Licensed Practical Nurse)</option>
+                        <option value="CNA">CNA (Certified Nursing Assistant)</option>
+                        <option value="Doctor">Doctor</option>
+                        <option value="PA">PA (Physician Assistant)</option>
+                        <option value="NP">NP (Nurse Practitioner)</option>
+                        <option value="Therapist">Therapist</option>
+                        <option value="Pharmacist">Pharmacist</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="positionStartDate">Start Date *</label>
+                    <input type="date" id="positionStartDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="positionEndDate">End Date (optional)</label>
+                    <input type="date" id="positionEndDate">
+                </div>
+                <div class="form-group">
+                    <label for="positionSalary">Salary (Annual) *</label>
+                    <input type="number" id="positionSalary" required min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="positionLocation">Location (if different from facility)</label>
+                    <input type="text" id="positionLocation">
+                </div>
+                <div class="form-group">
+                    <label for="positionDescription">Description</label>
+                    <textarea id="positionDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="positionRequirements">Requirements</label>
+                    <textarea id="positionRequirements"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="positionOpenings">Number of Openings *</label>
+                    <input type="number" id="positionOpenings" required min="1" value="1">
+                </div>
+                <button type="submit" class="btn">Save Position</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+        let authToken = localStorage.getItem('facilityToken');
+        let currentFacility = null;
+        let positions = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            if (authToken) {
+                loadDashboard();
+            }
+
+            // Form handlers
+            document.getElementById('signinForm').addEventListener('submit', handleSignin);
+            document.getElementById('signupForm').addEventListener('submit', handleSignup);
+            document.getElementById('editProfileForm').addEventListener('submit', handleEditProfile);
+            document.getElementById('positionForm').addEventListener('submit', handleSavePosition);
+        });
+
+        // Show alert
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alertContainer.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        // Sign In
+        async function handleSignin(e) {
+            e.preventDefault();
+            const email = document.getElementById('signinEmail').value;
+            const password = document.getElementById('signinPassword').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/facilities/signin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    authToken = data.data.token;
+                    localStorage.setItem('facilityToken', authToken);
+                    showAlert('Signed in successfully!');
+                    loadDashboard();
+                } else {
+                    showAlert(data.error || 'Sign in failed', 'error');
+                }
+            } catch (error) {
+                showAlert('Error signing in. Please try again.', 'error');
+                console.error(error);
+            }
+        }
+
+        // Sign Up
+        async function handleSignup(e) {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                facilityType: document.getElementById('facilityType').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value.toUpperCase(),
+                zipCode: document.getElementById('zipCode').value,
+                phoneNumber: document.getElementById('phoneNumber').value,
+                description: document.getElementById('description').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/facilities/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    authToken = data.data.token;
+                    localStorage.setItem('facilityToken', authToken);
+                    showAlert('Account created successfully!');
+                    loadDashboard();
+                } else {
+                    showAlert(data.error || 'Sign up failed', 'error');
+                }
+            } catch (error) {
+                showAlert('Error creating account. Please try again.', 'error');
+                console.error(error);
+            }
+        }
+
+        // Load Dashboard
+        async function loadDashboard() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            
+            await loadProfile();
+            await loadPositions();
+        }
+
+        // Load Profile
+        async function loadProfile() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/facilities/profile`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentFacility = data.data;
+                    displayProfile(currentFacility);
+                } else {
+                    showAlert('Failed to load profile', 'error');
+                }
+            } catch (error) {
+                showAlert('Error loading profile', 'error');
+                console.error(error);
+            }
+        }
+
+        // Display Profile
+        function displayProfile(facility) {
+            const profileInfo = document.getElementById('profileInfo');
+            profileInfo.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">Name</span>
+                    <span class="info-value">${facility.name}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Type</span>
+                    <span class="info-value">${facility.facilityType}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">${facility.email}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">${facility.phoneNumber || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Address</span>
+                    <span class="info-value">${facility.address}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">City, State</span>
+                    <span class="info-value">${facility.city}, ${facility.state} ${facility.zipCode}</span>
+                </div>
+                ${facility.description ? `
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <span class="info-label">Description</span>
+                    <span class="info-value">${facility.description}</span>
+                </div>` : ''}
+            `;
+        }
+
+        // Edit Profile
+        function editProfile() {
+            if (!currentFacility) return;
+            
+            document.getElementById('editName').value = currentFacility.name;
+            document.getElementById('editFacilityType').value = currentFacility.facilityType;
+            document.getElementById('editAddress').value = currentFacility.address;
+            document.getElementById('editCity').value = currentFacility.city;
+            document.getElementById('editState').value = currentFacility.state;
+            document.getElementById('editZipCode').value = currentFacility.zipCode;
+            document.getElementById('editPhoneNumber').value = currentFacility.phoneNumber || '';
+            document.getElementById('editDescription').value = currentFacility.description || '';
+            
+            document.getElementById('editProfileModal').classList.remove('hidden');
+        }
+
+        function closeEditProfileModal() {
+            document.getElementById('editProfileModal').classList.add('hidden');
+        }
+
+        // Handle Edit Profile
+        async function handleEditProfile(e) {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('editName').value,
+                facilityType: document.getElementById('editFacilityType').value,
+                address: document.getElementById('editAddress').value,
+                city: document.getElementById('editCity').value,
+                state: document.getElementById('editState').value.toUpperCase(),
+                zipCode: document.getElementById('editZipCode').value,
+                phoneNumber: document.getElementById('editPhoneNumber').value,
+                description: document.getElementById('editDescription').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/facilities/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showAlert('Profile updated successfully!');
+                    closeEditProfileModal();
+                    loadProfile();
+                } else {
+                    showAlert(data.error || 'Update failed', 'error');
+                }
+            } catch (error) {
+                showAlert('Error updating profile', 'error');
+                console.error(error);
+            }
+        }
+
+        // Load Positions
+        async function loadPositions() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/facilities/positions`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    positions = data.data;
+                    displayPositions(positions);
+                } else {
+                    showAlert('Failed to load positions', 'error');
+                }
+            } catch (error) {
+                showAlert('Error loading positions', 'error');
+                console.error(error);
+            }
+        }
+
+        // Display Positions
+        function displayPositions(positions) {
+            const positionsList = document.getElementById('positionsList');
+            
+            if (positions.length === 0) {
+                positionsList.innerHTML = '<p>No positions yet. Click "Add Position" to create one.</p>';
+                return;
+            }
+
+            positionsList.innerHTML = positions.map(position => `
+                <div class="position-card">
+                    <div class="position-header">
+                        <div>
+                            <div class="position-title">${position.title}</div>
+                            <div class="position-meta">
+                                <span class="meta-item">📋 ${position.profession}</span>
+                                <span class="meta-item">💰 $${parseFloat(position.salary).toLocaleString()}/year</span>
+                                <span class="meta-item">📅 ${position.startDate}${position.endDate ? ' - ' + position.endDate : ''}</span>
+                                <span class="meta-item">👥 ${position.openings} opening(s)</span>
+                                ${position.location ? `<span class="meta-item">📍 ${position.location}</span>` : ''}
+                            </div>
+                        </div>
+                        <span class="status-badge status-${position.status.toLowerCase()}">${position.status}</span>
+                    </div>
+                    ${position.description ? `<p style="margin: 0.5rem 0; color: #666;">${position.description}</p>` : ''}
+                    ${position.requirements ? `<p style="margin: 0.5rem 0; color: #666;"><strong>Requirements:</strong> ${position.requirements}</p>` : ''}
+                    <div class="position-actions">
+                        <button class="btn btn-small btn-secondary" onclick="editPosition('${position.id}')">Edit</button>
+                        <button class="btn btn-small btn-danger" onclick="deletePosition('${position.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Show Add Position Modal
+        function showAddPositionModal() {
+            document.getElementById('positionModalTitle').textContent = 'Add Position';
+            document.getElementById('positionForm').reset();
+            document.getElementById('positionId').value = '';
+            document.getElementById('positionModal').classList.remove('hidden');
+        }
+
+        // Edit Position
+        function editPosition(positionId) {
+            const position = positions.find(p => p.id === positionId);
+            if (!position) return;
+
+            document.getElementById('positionModalTitle').textContent = 'Edit Position';
+            document.getElementById('positionId').value = position.id;
+            document.getElementById('positionTitle').value = position.title;
+            document.getElementById('positionProfession').value = position.profession;
+            document.getElementById('positionStartDate').value = position.startDate;
+            document.getElementById('positionEndDate').value = position.endDate || '';
+            document.getElementById('positionSalary').value = position.salary;
+            document.getElementById('positionLocation').value = position.location || '';
+            document.getElementById('positionDescription').value = position.description || '';
+            document.getElementById('positionRequirements').value = position.requirements || '';
+            document.getElementById('positionOpenings').value = position.openings;
+
+            document.getElementById('positionModal').classList.remove('hidden');
+        }
+
+        function closePositionModal() {
+            document.getElementById('positionModal').classList.add('hidden');
+        }
+
+        // Handle Save Position
+        async function handleSavePosition(e) {
+            e.preventDefault();
+            const positionId = document.getElementById('positionId').value;
+            const formData = {
+                title: document.getElementById('positionTitle').value,
+                profession: document.getElementById('positionProfession').value,
+                startDate: document.getElementById('positionStartDate').value,
+                endDate: document.getElementById('positionEndDate').value || null,
+                salary: parseFloat(document.getElementById('positionSalary').value),
+                location: document.getElementById('positionLocation').value,
+                description: document.getElementById('positionDescription').value,
+                requirements: document.getElementById('positionRequirements').value,
+                openings: parseInt(document.getElementById('positionOpenings').value)
+            };
+
+            try {
+                const url = positionId 
+                    ? `${API_BASE_URL}/facilities/positions/${positionId}`
+                    : `${API_BASE_URL}/facilities/positions`;
+                
+                const response = await fetch(url, {
+                    method: positionId ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showAlert(positionId ? 'Position updated!' : 'Position created!');
+                    closePositionModal();
+                    loadPositions();
+                } else {
+                    showAlert(data.error || 'Failed to save position', 'error');
+                }
+            } catch (error) {
+                showAlert('Error saving position', 'error');
+                console.error(error);
+            }
+        }
+
+        // Delete Position
+        async function deletePosition(positionId) {
+            if (!confirm('Are you sure you want to delete this position?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/facilities/positions/${positionId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showAlert('Position deleted');
+                    loadPositions();
+                } else {
+                    showAlert(data.error || 'Failed to delete position', 'error');
+                }
+            } catch (error) {
+                showAlert('Error deleting position', 'error');
+                console.error(error);
+            }
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('facilityToken');
+            authToken = null;
+            currentFacility = null;
+            positions = [];
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('signinForm').reset();
+            showAlert('Logged out successfully');
+        }
+    </script>
+</body>
+</html>
