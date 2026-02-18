@@ -223,33 +223,9 @@ struct HealthcareFacilitySignUpView: View {
     }
     
     func handleSignUp() {
-        // Validation
-        if facilityName.isEmpty || email.isEmpty || address.isEmpty || city.isEmpty || state.isEmpty || zipCode.isEmpty || facilityType.isEmpty || password.isEmpty {
-            alertMessage = "Please fill in all required fields"
-            showAlert = true
-            return
-        }
-        
-        if state.count != 2 {
-            alertMessage = "Please enter a valid 2-letter state code"
-            showAlert = true
-            return
-        }
-        
-        if password != confirmPassword {
-            alertMessage = "Passwords do not match!"
-            showAlert = true
-            return
-        }
-        
-        if password.count < 8 {
-            alertMessage = "Password must be at least 8 characters long"
-            showAlert = true
-            return
-        }
-        
-        if !agreeToTerms {
-            alertMessage = "Please agree to the Terms of Service and Privacy Policy"
+        // Validate input
+        if let errorMessage = validateInput() {
+            alertMessage = errorMessage
             showAlert = true
             return
         }
@@ -298,6 +274,48 @@ struct HealthcareFacilitySignUpView: View {
                 }
             }
         }
+    }
+    
+    private func validateInput() -> String? {
+        // Check required fields
+        if facilityName.isEmpty {
+            return "Please enter a facility name"
+        }
+        if email.isEmpty {
+            return "Please enter an email address"
+        }
+        if address.isEmpty {
+            return "Please enter a street address"
+        }
+        if city.isEmpty {
+            return "Please enter a city"
+        }
+        if state.isEmpty {
+            return "Please enter a state"
+        }
+        if state.count != 2 {
+            return "Please enter a valid 2-letter state code"
+        }
+        if zipCode.isEmpty {
+            return "Please enter a zip code"
+        }
+        if facilityType.isEmpty {
+            return "Please select a facility type"
+        }
+        if password.isEmpty {
+            return "Please enter a password"
+        }
+        if password.count < 8 {
+            return "Password must be at least 8 characters long"
+        }
+        if password != confirmPassword {
+            return "Passwords do not match!"
+        }
+        if !agreeToTerms {
+            return "Please agree to the Terms of Service and Privacy Policy"
+        }
+        
+        return nil
     }
 }
 
