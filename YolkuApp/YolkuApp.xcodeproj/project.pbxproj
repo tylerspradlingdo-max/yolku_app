@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		910305D7ACD3685D1A2D0880 /* HealthcareFacilitySignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83DE15318FFEFBF34B861B5 /* HealthcareFacilitySignUpView.swift */; };
 		A1000001000000000000001 /* YolkuAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002000000000000001 /* YolkuAppApp.swift */; };
 		A1000003000000000000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004000000000000001 /* ContentView.swift */; };
 		A1000005000000000000001 /* HeroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006000000000000001 /* HeroView.swift */; };
@@ -31,7 +32,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A1000021000000000000001 /* YolkuApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YolkuApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000002000000000000001 /* YolkuAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YolkuAppApp.swift; sourceTree = "<group>"; };
 		A1000004000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1000006000000000000001 /* HeroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroView.swift; sourceTree = "<group>"; };
@@ -42,6 +42,7 @@
 		A1000016000000000000001 /* ColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtension.swift; sourceTree = "<group>"; };
 		A1000018000000000000001 /* ButtonStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonStyles.swift; sourceTree = "<group>"; };
 		A1000020000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A1000021000000000000001 /* YolkuApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YolkuApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000022000000000000002 /* HealthcareWorkerSignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthcareWorkerSignUpView.swift; sourceTree = "<group>"; };
 		A1000024000000000000003 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		A1000026000000000000004 /* APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConfig.swift; sourceTree = "<group>"; };
@@ -53,6 +54,7 @@
 		A1000038000000000000010 /* MyShiftsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyShiftsView.swift; sourceTree = "<group>"; };
 		A1000040000000000000011 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		A1000042000000000000012 /* ShiftsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShiftsView.swift; sourceTree = "<group>"; };
+		D83DE15318FFEFBF34B861B5 /* HealthcareFacilitySignUpView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HealthcareFacilitySignUpView.swift; path = YolkuApp/HealthcareFacilitySignUpView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +73,7 @@
 			children = (
 				A1000024000000000000001 /* YolkuApp */,
 				A1000025000000000000001 /* Products */,
+				D83DE15318FFEFBF34B861B5 /* HealthcareFacilitySignUpView.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -199,6 +202,7 @@
 				A1000015000000000000001 /* ColorExtension.swift in Sources */,
 				A1000017000000000000001 /* ButtonStyles.swift in Sources */,
 				A1000001000000000000001 /* YolkuAppApp.swift in Sources */,
+				910305D7ACD3685D1A2D0880 /* HealthcareFacilitySignUpView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
