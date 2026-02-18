@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HeroView: View {
     @State private var showHealthcareWorkerSignUp = false
+    @State private var showHealthcareFacilitySignUp = false
     
     var body: some View {
         ZStack {
@@ -39,7 +40,7 @@ struct HeroView: View {
                     .buttonStyle(WhiteButtonStyle())
                     
                     Button("I'm a Healthcare Facility") {
-                        // Healthcare facility action
+                        showHealthcareFacilitySignUp = true
                     }
                     .buttonStyle(OutlineWhiteButtonStyle())
                 }
@@ -49,6 +50,9 @@ struct HeroView: View {
         }
         .sheet(isPresented: $showHealthcareWorkerSignUp) {
             HealthcareWorkerSignUpView()
+        }
+        .sheet(isPresented: $showHealthcareFacilitySignUp) {
+            HealthcareFacilitySignUpView()
         }
     }
 }

@@ -188,6 +188,90 @@ class APIService {
         return profileResponse.user
     }
     
+    func facilitySignUp(
+        name: String,
+        email: String,
+        password: String,
+        address: String,
+        city: String,
+        state: String,
+        zipCode: String,
+        phoneNumber: String?,
+        facilityType: String,
+        description: String?
+    ) async throws -> FacilityAuthResponse {
+        // Mock mode - return fake success response without server
+        if APIConfig.useMockMode {
+            // Simulate network delay
+            try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
+            
+            // Return mock successful facility sign up
+            return FacilityAuthResponse(
+                message: "Facility account created successfully! (Mock Mode)",
+                token: "mock_facility_token_\(UUID().uuidString)",
+                facility: FacilityData(
+                    id: UUID().uuidString,
+                    name: name,
+                    email: email,
+                    address: address,
+                    city: city,
+                    state: state,
+                    zipCode: zipCode,
+                    phoneNumber: phoneNumber,
+                    facilityType: facilityType,
+                    description: description,
+                    isActive: true,
+                    createdAt: ISO8601DateFormatter().string(from: Date()),
+                    updatedAt: ISO8601DateFormatter().string(from: Date())
+                )
+            )
+        }
+        
+        // Real API mode - connect to server
+        guard let url = URL(string: "\(APIConfig.baseURL)/api/facilities/signup") else {
+            throw APIError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body = FacilitySignUpRequest(
+            name: name,
+            email: email,
+            password: password,
+            address: address,
+            city: city,
+            state: state,
+            zipCode: zipCode,
+            phoneNumber: phoneNumber,
+            facilityType: facilityType,
+            description: description
+        )
+        
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.error)
+            }
+            throw APIError.serverError("Facility sign up failed with status code: \(httpResponse.statusCode)")
+        }
+        
+        let facilityResponse = try JSONDecoder().decode(FacilitySignUpAPIResponse.self, from: data)
+        return FacilityAuthResponse(
+            message: facilityResponse.message,
+            token: facilityResponse.data.token,
+            facility: facilityResponse.data.facility
+        )
+    }
+    
     // MARK: - Positions
     
     func getPositions(state: String? = nil, startDate: String? = nil, endDate: String? = nil, profession: String? = nil) async throws -> [Position] {
@@ -328,6 +412,19 @@ struct SignUpRequest: Codable {
     let licenseNumber: String?
 }
 
+struct FacilitySignUpRequest: Codable {
+    let name: String
+    let email: String
+    let password: String
+    let address: String
+    let city: String
+    let state: String
+    let zipCode: String
+    let phoneNumber: String?
+    let facilityType: String
+    let description: String?
+}
+
 // MARK: - Response Models
 
 struct AuthResponse: Codable {
@@ -357,6 +454,41 @@ struct User: Codable {
 
 struct ErrorResponse: Codable {
     let error: String
+}
+
+// MARK: - Facility Models
+
+struct FacilityAuthResponse: Codable {
+    let message: String
+    let token: String
+    let facility: FacilityData
+}
+
+struct FacilitySignUpAPIResponse: Codable {
+    let success: Bool
+    let message: String
+    let data: FacilitySignUpData
+}
+
+struct FacilitySignUpData: Codable {
+    let facility: FacilityData
+    let token: String
+}
+
+struct FacilityData: Codable {
+    let id: String
+    let name: String
+    let email: String
+    let address: String
+    let city: String
+    let state: String
+    let zipCode: String
+    let phoneNumber: String?
+    let facilityType: String
+    let description: String?
+    let isActive: Bool
+    let createdAt: String
+    let updatedAt: String
 }
 
 // MARK: - Position Models
