@@ -202,8 +202,8 @@ class APIService {
     ) async throws -> FacilityAuthResponse {
         // Mock mode - return fake success response without server
         if APIConfig.useMockMode {
-            // Simulate network delay
-            try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
+            // Simulate network delay (1.5 seconds)
+            try await Task.sleep(nanoseconds: UInt64(1.5 * 1_000_000_000))
             
             // Return mock successful facility sign up
             return FacilityAuthResponse(

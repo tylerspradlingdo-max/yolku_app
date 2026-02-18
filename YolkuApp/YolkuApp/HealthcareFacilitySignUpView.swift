@@ -309,7 +309,7 @@ struct HealthcareFacilitySignUpView: View {
             return "Password must be at least 8 characters long"
         }
         if password != confirmPassword {
-            return "Passwords do not match!"
+            return "Passwords do not match"
         }
         if !agreeToTerms {
             return "Please agree to the Terms of Service and Privacy Policy"
