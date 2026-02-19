@@ -54,7 +54,7 @@
 		A1000038000000000000010 /* MyShiftsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyShiftsView.swift; sourceTree = "<group>"; };
 		A1000040000000000000011 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		A1000042000000000000012 /* ShiftsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShiftsView.swift; sourceTree = "<group>"; };
-		AB086FB87EC2B28133C487AB /* HealthcareFacilitySignUpView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HealthcareFacilitySignUpView.swift; sourceTree = "<group>"; };
+		AB086FB87EC2B28133C487AB /* HealthcareFacilitySignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthcareFacilitySignUpView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,7 +73,6 @@
 			children = (
 				A1000024000000000000001 /* YolkuApp */,
 				A1000025000000000000001 /* Products */,
-				AB086FB87EC2B28133C487AB /* HealthcareFacilitySignUpView.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -98,6 +97,7 @@
 				A1000038000000000000010 /* MyShiftsView.swift */,
 				A1000040000000000000011 /* ProfileView.swift */,
 				A1000042000000000000012 /* ShiftsView.swift */,
+				AB086FB87EC2B28133C487AB /* HealthcareFacilitySignUpView.swift */,
 				A1000016000000000000001 /* ColorExtension.swift */,
 				A1000018000000000000001 /* ButtonStyles.swift */,
 				A1000020000000000000001 /* Assets.xcassets */,
