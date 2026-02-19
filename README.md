@@ -78,6 +78,40 @@ yolku_app/
         └── Assets.xcassets/       # App assets
 ```
 
+## Fresh Start / Restoring from Scratch
+
+If your local Xcode project files are broken or corrupted, follow these steps to restore a clean copy:
+
+1. **Delete your local copy** (only if you have no uncommitted local changes you need to keep)
+   ```bash
+   # Navigate to the parent folder of your project
+   cd ~/path/to/parent/folder
+   rm -rf yolku_app
+   ```
+
+2. **Clone the repository fresh**
+   ```bash
+   git clone https://github.com/tylerspradlingdo-max/yolku_app.git
+   cd yolku_app
+   ```
+
+3. **Open the Xcode project**
+   ```bash
+   cd YolkuApp
+   open YolkuApp.xcodeproj
+   ```
+
+4. **Clean build folder and rebuild** (in Xcode)
+   - Press **⇧⌘K** (Product → Clean Build Folder)
+   - Press **⌘B** to build
+   - Press **⌘R** to run
+
+All Swift source files, the Xcode project configuration, and assets are stored in the repository. Cloning gives you a fully working project with all files properly referenced.
+
+> **Tip:** Xcode user settings and derived data are excluded from the repository (via `.gitignore`), so a fresh clone will always give you a clean, unmodified project state.
+
+---
+
 ## Setup Instructions
 
 ### Web Landing Page
