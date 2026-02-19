@@ -38,21 +38,21 @@ struct HeroView: View {
                         showHealthcareWorkerSignUp = true
                     }
                     .buttonStyle(WhiteButtonStyle())
+                    .sheet(isPresented: $showHealthcareWorkerSignUp) {
+                        HealthcareWorkerSignUpView()
+                    }
                     
                     Button("I'm a Healthcare Facility") {
                         showHealthcareFacilitySignUp = true
                     }
                     .buttonStyle(OutlineWhiteButtonStyle())
+                    .sheet(isPresented: $showHealthcareFacilitySignUp) {
+                        HealthcareFacilitySignUpView()
+                    }
                 }
                 .padding(.top, 10)
             }
             .padding(.vertical, 80)
-        }
-        .sheet(isPresented: $showHealthcareWorkerSignUp) {
-            HealthcareWorkerSignUpView()
-        }
-        .sheet(isPresented: $showHealthcareFacilitySignUp) {
-            HealthcareFacilitySignUpView()
         }
     }
 }
