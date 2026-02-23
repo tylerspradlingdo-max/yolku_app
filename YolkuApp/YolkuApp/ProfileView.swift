@@ -17,6 +17,7 @@ struct ProfileView: View {
     @State private var selectedImage: UIImage?
     @State private var showingImagePicker = false
     @State private var showingDocuments = false
+    @State private var showingHousing = false
     
     var body: some View {
         NavigationView {
@@ -118,6 +119,12 @@ struct ProfileView: View {
                         )
                         
                         ProfileActionButton(
+                            icon: "house.fill",
+                            title: "Find Housing",
+                            action: { showingHousing = true }
+                        )
+                        
+                        ProfileActionButton(
                             icon: "bell.fill",
                             title: "Notifications",
                             action: {}
@@ -166,6 +173,9 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $showingDocuments) {
                 DocumentsView()
+            }
+            .sheet(isPresented: $showingHousing) {
+                HousingView()
             }
             .onAppear {
                 loadProfileImage()
