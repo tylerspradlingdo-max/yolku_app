@@ -20,8 +20,8 @@ struct HeroView: View {
             )
             
             VStack(spacing: 20) {
-                // LOGO: Using image logo from Assets.xcassets
-                Image("AppLogo")
+                // LOGO: White version for purple gradient background
+                Image("AppLogoWhite")
                     .resizable()
                     .scaledToFit()
                     .frame(height: 60)
