@@ -81,8 +81,23 @@ struct HomeTabView: View {
     let firstName: String
     let profession: String
     
+    @AppStorage("profileFirstName") private var profileFirstName = ""
+    @State private var profileCredentials: [String] = []
+    
     @State private var showingAvailability = false
     @Binding var selectedTab: Int
+    
+    private var displayName: String {
+        let name = profileFirstName.isEmpty ? firstName : profileFirstName
+        return name.isEmpty ? "Healthcare Professional" : name
+    }
+    
+    private var displayCredential: String {
+        if !profileCredentials.isEmpty {
+            return profileCredentials.sorted().joined(separator: ", ")
+        }
+        return profession
+    }
     
     var body: some View {
         NavigationView {
@@ -94,7 +109,7 @@ struct HomeTabView: View {
                             .font(.title2)
                             .foregroundColor(.gray)
                         
-                        Text(firstName.isEmpty ? "Healthcare Professional" : firstName)
+                        Text(displayName)
                             .font(.system(size: 32, weight: .bold))
                             .foregroundStyle(
                                 LinearGradient(
@@ -104,8 +119,8 @@ struct HomeTabView: View {
                                 )
                             )
                         
-                        if !profession.isEmpty {
-                            Text(profession)
+                        if !displayCredential.isEmpty {
+                            Text(displayCredential)
                                 .font(.headline)
                                 .foregroundColor(Color(hex: "667eea"))
                         }
@@ -212,6 +227,9 @@ struct HomeTabView: View {
             }
             .sheet(isPresented: $showingAvailability) {
                 AvailabilityView()
+            }
+            .onAppear {
+                profileCredentials = UserDefaults.standard.stringArray(forKey: "profileCredentials") ?? []
             }
         }
     }
