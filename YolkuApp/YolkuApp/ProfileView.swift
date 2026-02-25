@@ -76,27 +76,20 @@ struct ProfileView: View {
                         .buttonStyle(PlainButtonStyle())
                         
                         VStack(spacing: 4) {
-                            // Full name with optional credentials badge
-                            HStack(spacing: 6) {
-                                Text(displayLastName.isEmpty ? displayFirstName : "\(displayFirstName) \(displayLastName)")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
+                            Text(displayLastName.isEmpty ? displayFirstName : "\(displayFirstName) \(displayLastName)")
+                                .font(.title2)
+                                .fontWeight(.bold)
 
-                                if !displayCredentials.isEmpty {
-                                    Text(displayCredentials.joined(separator: ", "))
-                                        .font(.caption)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(Color(hex: "667eea"))
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(Color(hex: "667eea").opacity(0.1))
-                                        .cornerRadius(4)
-                                }
+                            if !displayCredentials.isEmpty {
+                                Text(displayCredentials.joined(separator: ", "))
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(Color(hex: "667eea"))
+                            } else {
+                                Text(profession)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
                             }
-
-                            Text(profession)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
 
                             Text(displayEmail)
                                 .font(.footnote)
