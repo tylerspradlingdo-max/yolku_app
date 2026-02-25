@@ -18,6 +18,14 @@ struct ProfileView: View {
     @State private var showingImagePicker = false
     @State private var showingDocuments = false
     @State private var showingHousing = false
+    @State private var showingEditProfile = false
+
+    // Persisted profile data (refreshed when returning from Edit Profile)
+    @State private var displayFirstName: String = ""
+    @State private var displayLastName: String = ""
+    @State private var displayEmail: String = ""
+    @State private var displayPhone: String = ""
+    @State private var displayCredentials: [String] = []
     
     var body: some View {
         NavigationView {
@@ -68,17 +76,37 @@ struct ProfileView: View {
                         .buttonStyle(PlainButtonStyle())
                         
                         VStack(spacing: 4) {
-                            Text(firstName)
-                                .font(.title2)
-                                .fontWeight(.bold)
-                            
+                            // Full name with optional credentials badge
+                            HStack(spacing: 6) {
+                                Text(displayLastName.isEmpty ? displayFirstName : "\(displayFirstName) \(displayLastName)")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+
+                                if !displayCredentials.isEmpty {
+                                    Text(displayCredentials.joined(separator: ", "))
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(Color(hex: "667eea"))
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color(hex: "667eea").opacity(0.1))
+                                        .cornerRadius(4)
+                                }
+                            }
+
                             Text(profession)
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
-                            
-                            Text(email)
+
+                            Text(displayEmail)
                                 .font(.footnote)
                                 .foregroundColor(.gray)
+
+                            if !displayPhone.isEmpty {
+                                Text(displayPhone)
+                                    .font(.footnote)
+                                    .foregroundColor(.gray)
+                            }
                         }
                     }
                     .padding(.top, 20)
@@ -109,7 +137,7 @@ struct ProfileView: View {
                         ProfileActionButton(
                             icon: "person.fill",
                             title: "Edit Profile",
-                            action: {}
+                            action: { showingEditProfile = true }
                         )
                         
                         ProfileActionButton(
@@ -177,8 +205,12 @@ struct ProfileView: View {
             .sheet(isPresented: $showingHousing) {
                 HousingView()
             }
+            .sheet(isPresented: $showingEditProfile, onDismiss: loadProfileData) {
+                EditProfileView()
+            }
             .onAppear {
                 loadProfileImage()
+                loadProfileData()
             }
         }
     }
@@ -189,6 +221,15 @@ struct ProfileView: View {
            let uiImage = UIImage(data: imageData) {
             selectedImage = uiImage
         }
+    }
+
+    // Load profile data from UserDefaults (merging sign-up data with edits)
+    private func loadProfileData() {
+        displayFirstName = UserDefaults.standard.string(forKey: "profileFirstName") ?? firstName
+        displayLastName = UserDefaults.standard.string(forKey: "profileLastName") ?? ""
+        displayEmail = UserDefaults.standard.string(forKey: "profileEmail") ?? email
+        displayPhone = UserDefaults.standard.string(forKey: "profilePhone") ?? ""
+        displayCredentials = UserDefaults.standard.stringArray(forKey: "profileCredentials") ?? []
     }
     
     // Save profile image

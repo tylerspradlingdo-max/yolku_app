@@ -29,6 +29,7 @@
 		A1000039000000000000011 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000040000000000000011 /* ProfileView.swift */; };
 		A1000041000000000000012 /* ShiftsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000042000000000000012 /* ShiftsView.swift */; };
 		A1000043000000000000013 /* HousingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000044000000000000013 /* HousingView.swift */; };
+		A1000045000000000000014 /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000046000000000000014 /* EditProfileView.swift */; };
 		E51663F72FC594536B40DCA0 /* HealthcareFacilitySignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB086FB87EC2B28133C487AB /* HealthcareFacilitySignUpView.swift */; };
 /* End PBXBuildFile section */
 
@@ -56,6 +57,7 @@
 		A1000040000000000000011 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		A1000042000000000000012 /* ShiftsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShiftsView.swift; sourceTree = "<group>"; };
 		A1000044000000000000013 /* HousingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HousingView.swift; sourceTree = "<group>"; };
+		A1000046000000000000014 /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
 		AB086FB87EC2B28133C487AB /* HealthcareFacilitySignUpView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HealthcareFacilitySignUpView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -100,6 +102,7 @@
 				A1000040000000000000011 /* ProfileView.swift */,
 				A1000042000000000000012 /* ShiftsView.swift */,
 				A1000044000000000000013 /* HousingView.swift */,
+				A1000046000000000000014 /* EditProfileView.swift */,
 				AB086FB87EC2B28133C487AB /* HealthcareFacilitySignUpView.swift */,
 				A1000016000000000000001 /* ColorExtension.swift */,
 				A1000018000000000000001 /* ButtonStyles.swift */,
@@ -203,6 +206,7 @@
 				A1000039000000000000011 /* ProfileView.swift in Sources */,
 				A1000041000000000000012 /* ShiftsView.swift in Sources */,
 				A1000043000000000000013 /* HousingView.swift in Sources */,
+				A1000045000000000000014 /* EditProfileView.swift in Sources */,
 				A1000015000000000000001 /* ColorExtension.swift in Sources */,
 				A1000017000000000000001 /* ButtonStyles.swift in Sources */,
 				A1000001000000000000001 /* YolkuAppApp.swift in Sources */,
