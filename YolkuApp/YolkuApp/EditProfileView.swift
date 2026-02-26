@@ -295,7 +295,7 @@ struct EditFormField: View {
 
             TextField(placeholder, text: $text)
                 .keyboardType(keyboardType)
-                .autocapitalization(.none)
+                .textInputAutocapitalization(.never)
                 .padding(12)
                 .background(Color(hex: "f8f9fa"))
                 .overlay(
@@ -368,7 +368,7 @@ struct StateLicenseRow: View {
                         .foregroundColor(Color(hex: "666666"))
 
                     TextField("e.g. RN123456", text: $license.licenseNumber)
-                        .autocapitalization(.allCharacters)
+                        .textInputAutocapitalization(.characters)
                         .padding(10)
                         .background(Color(hex: "f8f9fa"))
                         .overlay(

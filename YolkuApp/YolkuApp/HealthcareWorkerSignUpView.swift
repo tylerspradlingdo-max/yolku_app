@@ -292,7 +292,7 @@ struct FormField: View {
             
             TextField(placeholder, text: $text)
                 .keyboardType(keyboardType)
-                .autocapitalization(.none)
+                .textInputAutocapitalization(.never)
                 .padding()
                 .background(Color.white)
                 .overlay(

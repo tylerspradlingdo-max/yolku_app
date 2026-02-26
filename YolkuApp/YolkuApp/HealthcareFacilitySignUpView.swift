@@ -95,7 +95,7 @@ struct HealthcareFacilitySignUpView: View {
                         HStack(spacing: 12) {
                             FormField(label: "City", text: $city, placeholder: "Boston")
                             FormField(label: "State", text: $state, placeholder: "MA")
-                                .onChange(of: state) { newValue in
+                                .onChange(of: state) { _, newValue in
                                     state = newValue.uppercased().prefix(2).description
                                 }
                         }
