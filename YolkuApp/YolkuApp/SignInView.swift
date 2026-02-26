@@ -69,7 +69,7 @@ struct SignInView: View {
                                     
                                     TextField("you@example.com", text: $email)
                                         .keyboardType(.emailAddress)
-                                        .autocapitalization(.none)
+                                        .textInputAutocapitalization(.never)
                                         .padding()
                                         .background(Color.white)
                                         .overlay(
