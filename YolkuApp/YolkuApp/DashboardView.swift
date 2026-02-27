@@ -39,6 +39,13 @@ struct DashboardView: View {
                 }
                 .tag(2)
             
+            // Messages Tab
+            ChatView()
+                .tabItem {
+                    Label("Messages", systemImage: "bubble.left.and.bubble.right.fill")
+                }
+                .tag(3)
+            
             // Profile Tab
             ProfileView(
                 firstName: userFirstName,
@@ -49,7 +56,7 @@ struct DashboardView: View {
             .tabItem {
                 Label("Profile", systemImage: "person.fill")
             }
-            .tag(3)
+            .tag(4)
         }
         .accentColor(Color(hex: "667eea"))
         .alert("Sign Out", isPresented: $showingLogoutAlert) {
@@ -175,12 +182,17 @@ struct HomeTabView: View {
                             }
                             .buttonStyle(PlainButtonStyle())
                             
-                            ActionButton(
-                                icon: "envelope.fill",
-                                title: "Messages",
-                                subtitle: "Chat with facilities",
-                                color: Color(hex: "764ba2")
-                            )
+                            Button(action: {
+                                selectedTab = 3 // Navigate to Messages tab
+                            }) {
+                                ActionButton(
+                                    icon: "envelope.fill",
+                                    title: "Messages",
+                                    subtitle: "Chat with facilities",
+                                    color: Color(hex: "764ba2")
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
                         .padding(.horizontal, 24)
                     }

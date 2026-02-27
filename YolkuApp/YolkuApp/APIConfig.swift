@@ -54,4 +54,11 @@ struct APIConfig {
             return "\(baseURL)\(apiPath)/positions/\(id)"
         }
     }
+    
+    struct Messages {
+        static let conversations = "\(baseURL)\(apiPath)/messages/conversations"
+        static func conversation(id: String) -> String {
+            return "\(baseURL)\(apiPath)/messages/conversations/\(id)"
+        }
+    }
 }
