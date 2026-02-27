@@ -348,6 +348,195 @@ class APIService {
         return statesResponse.data
     }
     
+    // MARK: - Chat / Messaging
+    
+    func getConversations(token: String) async throws -> [ChatConversation] {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 500_000_000)
+            return generateMockConversations()
+        }
+        
+        guard let url = URL(string: APIConfig.Messages.conversations) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.invalidResponse
+        }
+        let result = try JSONDecoder().decode(ConversationsResponse.self, from: data)
+        return result.data
+    }
+    
+    func getMessages(conversationId: String, token: String) async throws -> ChatConversation {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 300_000_000)
+            return generateMockConversationDetail(id: conversationId)
+        }
+        
+        guard let url = URL(string: APIConfig.Messages.conversation(id: conversationId)) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.invalidResponse
+        }
+        let result = try JSONDecoder().decode(ConversationResponse.self, from: data)
+        return result.data
+    }
+    
+    func sendMessage(conversationId: String, content: String, token: String) async throws -> ChatMessage {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 300_000_000)
+            let now = ISO8601DateFormatter().string(from: Date())
+            return ChatMessage(
+                id: UUID().uuidString,
+                conversationId: conversationId,
+                senderType: "user",
+                senderId: "mock-user-id",
+                content: content,
+                isRead: false,
+                createdAt: now,
+                updatedAt: now
+            )
+        }
+        
+        guard let url = URL(string: APIConfig.Messages.conversation(id: conversationId)) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONEncoder().encode(["content": content])
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.invalidResponse
+        }
+        let result = try JSONDecoder().decode(SendMessageResponse.self, from: data)
+        return result.data
+    }
+    
+    func startConversation(facilityId: String, content: String, token: String) async throws -> ChatConversation {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 500_000_000)
+            let now = ISO8601DateFormatter().string(from: Date())
+            let msg = ChatMessage(
+                id: UUID().uuidString,
+                conversationId: "mock-conv-new",
+                senderType: "user",
+                senderId: "mock-user-id",
+                content: content,
+                isRead: false,
+                createdAt: now,
+                updatedAt: now
+            )
+            return ChatConversation(
+                id: "mock-conv-new",
+                userId: "mock-user-id",
+                facilityId: facilityId,
+                user: nil,
+                facility: ChatFacility(id: facilityId, name: "New Facility", city: "Dallas", state: "TX", facilityType: "Clinic"),
+                messages: [msg],
+                createdAt: now,
+                updatedAt: now
+            )
+        }
+        
+        guard let url = URL(string: APIConfig.Messages.conversations) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONEncoder().encode(["facilityId": facilityId, "content": content])
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.invalidResponse
+        }
+        let result = try JSONDecoder().decode(StartConversationResponse.self, from: data)
+        return result.data.conversation
+    }
+    
+    // MARK: - Mock Chat Data
+    
+    private func generateMockConversations() -> [ChatConversation] {
+        let now = ISO8601DateFormatter().string(from: Date())
+        let yesterday = ISO8601DateFormatter().string(from: Date(timeIntervalSinceNow: -86400))
+        
+        return [
+            ChatConversation(
+                id: "conv-1",
+                userId: "mock-user-id",
+                facilityId: "fac-1",
+                user: nil,
+                facility: ChatFacility(id: "fac-1", name: "General Hospital", city: "San Francisco", state: "CA", facilityType: "Hospital"),
+                messages: [
+                    ChatMessage(id: "msg-1", conversationId: "conv-1", senderType: "facility", senderId: "fac-1",
+                                content: "Hi! We have a day shift opening this Friday. Are you available?",
+                                isRead: true, createdAt: yesterday, updatedAt: yesterday)
+                ],
+                createdAt: yesterday,
+                updatedAt: yesterday
+            ),
+            ChatConversation(
+                id: "conv-2",
+                userId: "mock-user-id",
+                facilityId: "fac-2",
+                user: nil,
+                facility: ChatFacility(id: "fac-2", name: "City Medical Center", city: "Los Angeles", state: "CA", facilityType: "Hospital"),
+                messages: [
+                    ChatMessage(id: "msg-2", conversationId: "conv-2", senderType: "user", senderId: "mock-user-id",
+                                content: "Hello, I am interested in your RN position.",
+                                isRead: true, createdAt: now, updatedAt: now)
+                ],
+                createdAt: now,
+                updatedAt: now
+            )
+        ]
+    }
+    
+    private func generateMockConversationDetail(id: String) -> ChatConversation {
+        let now = ISO8601DateFormatter().string(from: Date())
+        let earlier = ISO8601DateFormatter().string(from: Date(timeIntervalSinceNow: -3600))
+        let yesterday = ISO8601DateFormatter().string(from: Date(timeIntervalSinceNow: -86400))
+        
+        let messages: [ChatMessage] = [
+            ChatMessage(id: "msg-a", conversationId: id, senderType: "user", senderId: "mock-user-id",
+                        content: "Hello, I am interested in the open shift at your facility.",
+                        isRead: true, createdAt: yesterday, updatedAt: yesterday),
+            ChatMessage(id: "msg-b", conversationId: id, senderType: "facility", senderId: "fac-1",
+                        content: "Hi! Thanks for reaching out. We have openings on Friday and Saturday. Do either of those work for you?",
+                        isRead: true, createdAt: earlier, updatedAt: earlier),
+            ChatMessage(id: "msg-c", conversationId: id, senderType: "user", senderId: "mock-user-id",
+                        content: "Friday works great for me.",
+                        isRead: true, createdAt: now, updatedAt: now)
+        ]
+        
+        return ChatConversation(
+            id: id,
+            userId: "mock-user-id",
+            facilityId: "fac-1",
+            user: ChatUser(id: "mock-user-id", firstName: "Demo", lastName: "User", profession: "RN"),
+            facility: ChatFacility(id: "fac-1", name: "General Hospital", city: "San Francisco", state: "CA", facilityType: "Hospital"),
+            messages: messages,
+            createdAt: yesterday,
+            updatedAt: now
+        )
+    }
+
     // Helper to generate mock positions
     private func generateMockPositions(state: String?, startDate: String?, endDate: String?, profession: String?) -> [Position] {
         let facilities = [
@@ -585,4 +774,88 @@ enum APIError: Error, LocalizedError {
             return "Network connection error"
         }
     }
+}
+
+// MARK: - Chat Models
+
+struct ChatMessage: Codable, Identifiable {
+    let id: String
+    let conversationId: String
+    let senderType: String   // "user" or "facility"
+    let senderId: String
+    let content: String
+    let isRead: Bool
+    let createdAt: String
+    let updatedAt: String
+    
+    var formattedTime: String {
+        let formatter = ISO8601DateFormatter()
+        // Try with fractional seconds first, then without
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let date = formatter.date(from: createdAt) ?? {
+            formatter.formatOptions = [.withInternetDateTime]
+            return formatter.date(from: createdAt)
+        }()
+        guard let date = date else { return "" }
+        let display = DateFormatter()
+        display.dateFormat = "h:mm a"
+        return display.string(from: date)
+    }
+}
+
+struct ChatConversation: Codable, Identifiable {
+    let id: String
+    let userId: String
+    let facilityId: String
+    let user: ChatUser?
+    let facility: ChatFacility?
+    let messages: [ChatMessage]?
+    let createdAt: String
+    let updatedAt: String
+    
+    var lastMessage: ChatMessage? { messages?.last }
+}
+
+struct ChatUser: Codable {
+    let id: String
+    let firstName: String
+    let lastName: String
+    let profession: String
+    
+    var fullName: String { "\(firstName) \(lastName)" }
+}
+
+struct ChatFacility: Codable {
+    let id: String
+    let name: String
+    let city: String
+    let state: String
+    let facilityType: String
+    
+    var location: String { "\(city), \(state)" }
+}
+
+struct ConversationsResponse: Codable {
+    let success: Bool
+    let data: [ChatConversation]
+}
+
+struct ConversationResponse: Codable {
+    let success: Bool
+    let data: ChatConversation
+}
+
+struct SendMessageResponse: Codable {
+    let success: Bool
+    let data: ChatMessage
+}
+
+struct StartConversationData: Codable {
+    let conversation: ChatConversation
+    let message: ChatMessage
+}
+
+struct StartConversationResponse: Codable {
+    let success: Bool
+    let data: StartConversationData
 }

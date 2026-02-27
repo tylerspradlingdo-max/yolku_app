@@ -14,6 +14,7 @@ const userRoutes = require('./routes/users');
 const healthRoutes = require('./routes/health');
 const positionsRoutes = require('./routes/positions');
 const facilitiesRoutes = require('./routes/facilities');
+const messagesRoutes = require('./routes/messages');
 
 // Middleware
 app.use(helmet()); // Security headers
@@ -32,6 +33,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/positions', positionsRoutes);
 app.use('/api/facilities', facilitiesRoutes);
+app.use('/api/messages', messagesRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -44,7 +46,8 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       users: '/api/users',
       positions: '/api/positions',
-      facilities: '/api/facilities'
+      facilities: '/api/facilities',
+      messages: '/api/messages'
     }
   });
 });
