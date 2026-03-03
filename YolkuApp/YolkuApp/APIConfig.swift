@@ -61,4 +61,9 @@ struct APIConfig {
             return "\(baseURL)\(apiPath)/messages/conversations/\(id)"
         }
     }
+    
+    struct AI {
+        static let match = "\(baseURL)\(apiPath)/ai/match"
+        static let professions = "\(baseURL)\(apiPath)/ai/professions"
+    }
 }
