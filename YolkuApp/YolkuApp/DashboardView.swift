@@ -32,19 +32,26 @@ struct DashboardView: View {
                 }
                 .tag(1)
             
+            // AI Matcher Tab
+            AIJobMatcherView()
+                .tabItem {
+                    Label("AI Matcher", systemImage: "sparkles")
+                }
+                .tag(2)
+            
             // My Positions Tab
             MyShiftsView()
                 .tabItem {
                     Label("My Positions", systemImage: "calendar")
                 }
-                .tag(2)
+                .tag(3)
             
             // Messages Tab
             ChatView()
                 .tabItem {
                     Label("Messages", systemImage: "bubble.left.and.bubble.right.fill")
                 }
-                .tag(3)
+                .tag(4)
             
             // Profile Tab
             ProfileView(
@@ -56,7 +63,7 @@ struct DashboardView: View {
             .tabItem {
                 Label("Profile", systemImage: "person.fill")
             }
-            .tag(4)
+            .tag(5)
         }
         .accentColor(Color(hex: "667eea"))
         .alert("Sign Out", isPresented: $showingLogoutAlert) {
@@ -163,6 +170,18 @@ struct HomeTabView: View {
                             }
                             .buttonStyle(PlainButtonStyle())
                             
+                            Button(action: {
+                                selectedTab = 2 // Navigate to AI Matcher tab
+                            }) {
+                                ActionButton(
+                                    icon: "sparkles",
+                                    title: "AI Job Matcher",
+                                    subtitle: "Get personalized position recommendations",
+                                    color: Color(hex: "764ba2")
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            
                             ActionButton(
                                 icon: "calendar",
                                 title: "View My Schedule",
@@ -183,7 +202,7 @@ struct HomeTabView: View {
                             .buttonStyle(PlainButtonStyle())
                             
                             Button(action: {
-                                selectedTab = 3 // Navigate to Messages tab
+                                selectedTab = 4 // Navigate to Messages tab
                             }) {
                                 ActionButton(
                                     icon: "envelope.fill",

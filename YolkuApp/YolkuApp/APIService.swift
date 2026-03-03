@@ -470,7 +470,129 @@ class APIService {
         return result.data.conversation
     }
     
-    // MARK: - Mock Chat Data
+    // MARK: - AI Job Matching
+
+    func getAIMatches(
+        profession: String,
+        preferredState: String? = nil,
+        minSalary: Double? = nil,
+        limit: Int = 20
+    ) async throws -> AIMatchResponse {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 1_200_000_000) // 1.2 seconds
+            return generateMockAIMatches(profession: profession, preferredState: preferredState, minSalary: minSalary, limit: limit)
+        }
+
+        guard let url = URL(string: APIConfig.AI.match) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body = AIMatchRequest(profession: profession, preferredState: preferredState, minSalary: minSalary, limit: limit)
+        request.httpBody = try JSONEncoder().encode(body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.serverError("AI matching request failed")
+        }
+        return try JSONDecoder().decode(AIMatchResponse.self, from: data)
+    }
+
+    private func generateMockAIMatches(profession: String, preferredState: String?, minSalary: Double?, limit: Int) -> AIMatchResponse {
+        let allFacilities = [
+            Facility(id: "fac-1", name: "General Hospital", city: "San Francisco", state: "CA", facilityType: "Hospital"),
+            Facility(id: "fac-2", name: "City Medical Center", city: "Los Angeles", state: "CA", facilityType: "Hospital"),
+            Facility(id: "fac-3", name: "Community Nursing Home", city: "Sacramento", state: "CA", facilityType: "Nursing Home"),
+            Facility(id: "fac-4", name: "NYC Healthcare Center", city: "New York", state: "NY", facilityType: "Hospital"),
+            Facility(id: "fac-5", name: "Sunset Urgent Care", city: "San Diego", state: "CA", facilityType: "Urgent Care"),
+            Facility(id: "fac-6", name: "Austin Medical Clinic", city: "Austin", state: "TX", facilityType: "Clinic"),
+            Facility(id: "fac-7", name: "Chicago General", city: "Chicago", state: "IL", facilityType: "Hospital"),
+            Facility(id: "fac-8", name: "Miami Health Center", city: "Miami", state: "FL", facilityType: "Clinic")
+        ]
+        let relatedProfessions: [String: [String]] = [
+            "RN": ["RN", "LPN", "NP"],
+            "LPN": ["LPN", "RN", "CNA"],
+            "CNA": ["CNA", "LPN"],
+            "NP": ["NP", "RN", "PA"],
+            "PA": ["PA", "NP", "Doctor"],
+            "Doctor": ["Doctor", "PA", "NP"],
+            "Therapist": ["Therapist"],
+            "Pharmacist": ["Pharmacist"],
+            "Other": ["Other"]
+        ]
+        let pool = relatedProfessions[profession] ?? [profession]
+        let today = Date()
+        var positions: [AIMatchedPosition] = []
+        let isoFormatter = ISO8601DateFormatter()
+
+        for i in 0..<min(limit, allFacilities.count * 2) {
+            let facility = allFacilities[i % allFacilities.count]
+            let posProfession = pool[i % pool.count]
+            let daysAhead = i * 5
+            let startDate = Calendar.current.date(byAdding: .day, value: daysAhead, to: today)!
+            let startDateStr = isoFormatter.string(from: startDate).split(separator: "T").first.map(String.init) ?? ""
+            let salary = Double(55000 + i * 3000)
+            let isExactMatch = posProfession == profession
+            let inPreferredState = preferredState == nil || facility.state == preferredState?.uppercased()
+
+            var score = isExactMatch ? 60 : 20
+            var reasons: [String] = []
+            if isExactMatch {
+                reasons.append("Matches your profession (\(profession))")
+            } else {
+                reasons.append("Related profession (\(posProfession))")
+            }
+            if inPreferredState {
+                score += preferredState != nil ? 20 : 10
+                reasons.append("Located in \(facility.state)")
+            }
+            if let minSalary = minSalary, salary >= minSalary {
+                score += 10
+                reasons.append("Salary meets your expectation ($\(Int(salary).formatted()))")
+            } else if minSalary == nil {
+                score += 10
+                reasons.append("Salary: $\(Int(salary).formatted())/yr")
+            }
+            if daysAhead <= 30 {
+                score += 10
+                reasons.append("Starts within 30 days")
+            } else if daysAhead <= 90 {
+                score += 5
+                reasons.append("Starts within 90 days")
+            }
+            score = min(score, 100)
+
+            let pos = AIMatchedPosition(
+                id: "mock-ai-\(i)",
+                facility: facility,
+                title: "\(posProfession) - Full Time",
+                profession: posProfession,
+                description: "Seeking an experienced \(posProfession) for our \(facility.facilityType.lowercased()) team.",
+                requirements: "\(posProfession) license required. Minimum 1 year of experience.",
+                startDate: startDateStr,
+                endDate: nil,
+                salary: salary,
+                hourlyRate: salary / 2080,
+                openings: (i % 3) + 1,
+                status: "Open",
+                matchScore: score,
+                matchReasons: reasons
+            )
+            positions.append(pos)
+        }
+
+        positions.sort { $0.matchScore > $1.matchScore }
+        let sliced = Array(positions.prefix(limit))
+        return AIMatchResponse(
+            success: true,
+            profession: profession,
+            totalScanned: allFacilities.count * 2,
+            matchCount: sliced.count,
+            data: sliced
+        )
+    }
     
     private func generateMockConversations() -> [ChatConversation] {
         let now = ISO8601DateFormatter().string(from: Date())
@@ -858,4 +980,55 @@ struct StartConversationData: Codable {
 struct StartConversationResponse: Codable {
     let success: Bool
     let data: StartConversationData
+}
+
+// MARK: - AI Job Matching Models
+
+struct AIMatchRequest: Codable {
+    let profession: String
+    let preferredState: String?
+    let minSalary: Double?
+    let limit: Int?
+}
+
+struct AIMatchedPosition: Codable, Identifiable {
+    let id: String
+    let facility: Facility
+    let title: String
+    let profession: String
+    let description: String?
+    let requirements: String?
+    let startDate: String
+    let endDate: String?
+    let salary: Double
+    let hourlyRate: Double?
+    let openings: Int
+    let status: String
+    let matchScore: Int
+    let matchReasons: [String]
+
+    var formattedSalary: String {
+        if salary >= 1000 {
+            return String(format: "$%.0f/yr", salary)
+        }
+        return String(format: "$%.0f", salary)
+    }
+
+    var formattedStartDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        if let date = formatter.date(from: startDate) {
+            formatter.dateFormat = "MMM d, yyyy"
+            return formatter.string(from: date)
+        }
+        return startDate
+    }
+}
+
+struct AIMatchResponse: Codable {
+    let success: Bool
+    let profession: String
+    let totalScanned: Int
+    let matchCount: Int
+    let data: [AIMatchedPosition]
 }
