@@ -315,7 +315,7 @@ struct SecureFormField: View {
                 .foregroundColor(Color(hex: "333333"))
             
             SecureField(placeholder, text: $text)
-                .textContentType(.password)
+                .textContentType(.init(rawValue: ""))
                 .padding()
                 .background(Color.white)
                 .overlay(
