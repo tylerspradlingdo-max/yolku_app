@@ -82,6 +82,12 @@ const Position = sequelize.define('Position', {
       min: 0
     }
   },
+  // Compensation type: annual salary, daily rate, or hourly rate
+  compensationType: {
+    type: DataTypes.ENUM('annual_salary', 'daily_rate', 'hourly_rate'),
+    allowNull: false,
+    defaultValue: 'annual_salary'
+  },
   location: {
     type: DataTypes.STRING,
     allowNull: true

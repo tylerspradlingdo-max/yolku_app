@@ -266,6 +266,7 @@ class APIService {
         startDate: String,
         endDate: String?,
         salary: Double,
+        compensationType: String,
         location: String?,
         openings: Int
     ) async throws -> FacilityPosition {
@@ -282,6 +283,7 @@ class APIService {
                 startDate: startDate,
                 endDate: endDate,
                 salary: salary,
+                compensationType: compensationType,
                 location: location,
                 openings: openings,
                 status: "Open",
@@ -304,6 +306,7 @@ class APIService {
             startDate: startDate,
             endDate: endDate,
             salary: salary,
+            compensationType: compensationType,
             location: location,
             openings: openings
         )
@@ -354,6 +357,7 @@ class APIService {
                 startDate: startDate1,
                 endDate: nil,
                 salary: 85000,
+                compensationType: "annual_salary",
                 location: "San Francisco, CA",
                 openings: 2,
                 status: "Open",
@@ -370,6 +374,7 @@ class APIService {
                 startDate: startDate2,
                 endDate: nil,
                 salary: 45000,
+                compensationType: "annual_salary",
                 location: "San Francisco, CA",
                 openings: 1,
                 status: "Open",
@@ -935,6 +940,7 @@ struct CreatePositionRequest: Codable {
     let startDate: String
     let endDate: String?
     let salary: Double
+    let compensationType: String
     let location: String?
     let openings: Int
 }
@@ -1023,14 +1029,63 @@ struct FacilityPosition: Codable, Identifiable {
     let startDate: String
     let endDate: String?
     let salary: Double
+    let compensationType: String
     let location: String?
     let openings: Int
     let status: String
     let createdAt: String
     let updatedAt: String
 
+    init(id: String, facilityId: String, title: String, profession: String,
+         description: String?, requirements: String?, startDate: String,
+         endDate: String?, salary: Double, compensationType: String = "annual_salary",
+         location: String?, openings: Int, status: String,
+         createdAt: String, updatedAt: String) {
+        self.id = id
+        self.facilityId = facilityId
+        self.title = title
+        self.profession = profession
+        self.description = description
+        self.requirements = requirements
+        self.startDate = startDate
+        self.endDate = endDate
+        self.salary = salary
+        self.compensationType = compensationType
+        self.location = location
+        self.openings = openings
+        self.status = status
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        facilityId = try container.decode(String.self, forKey: .facilityId)
+        title = try container.decode(String.self, forKey: .title)
+        profession = try container.decode(String.self, forKey: .profession)
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+        requirements = try container.decodeIfPresent(String.self, forKey: .requirements)
+        startDate = try container.decode(String.self, forKey: .startDate)
+        endDate = try container.decodeIfPresent(String.self, forKey: .endDate)
+        salary = try container.decode(Double.self, forKey: .salary)
+        compensationType = try container.decodeIfPresent(String.self, forKey: .compensationType) ?? "annual_salary"
+        location = try container.decodeIfPresent(String.self, forKey: .location)
+        openings = try container.decode(Int.self, forKey: .openings)
+        status = try container.decode(String.self, forKey: .status)
+        createdAt = try container.decode(String.self, forKey: .createdAt)
+        updatedAt = try container.decode(String.self, forKey: .updatedAt)
+    }
+
     var formattedSalary: String {
-        String(format: "$%.0f/yr", salary)
+        switch compensationType {
+        case "daily_rate":
+            return String(format: "$%.0f/day", salary)
+        case "hourly_rate":
+            return String(format: "$%.2f/hr", salary)
+        default:
+            return String(format: "$%.0f/yr", salary)
+        }
     }
 
     var formattedStartDate: String {

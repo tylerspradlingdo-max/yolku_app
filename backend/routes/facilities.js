@@ -334,6 +334,7 @@ router.post('/positions', authMiddleware, [
   body('startDate').isISO8601().toDate().withMessage('Valid start date required'),
   body('endDate').optional({ nullable: true }).isISO8601().toDate().withMessage('Valid end date required'),
   body('salary').isFloat({ min: 0 }).withMessage('Valid salary required'),
+  body('compensationType').optional().isIn(['annual_salary', 'daily_rate', 'hourly_rate']).withMessage('Valid compensation type required'),
   body('location').optional().trim(),
   body('description').optional().trim(),
   body('requirements').optional().trim(),
@@ -348,7 +349,7 @@ router.post('/positions', authMiddleware, [
       });
     }
 
-    const { title, profession, description, requirements, startDate, endDate, salary, location, openings } = req.body;
+    const { title, profession, description, requirements, startDate, endDate, salary, compensationType, location, openings } = req.body;
 
     const position = await Position.create({
       facilityId: req.facilityId,
@@ -359,6 +360,7 @@ router.post('/positions', authMiddleware, [
       startDate,
       endDate,
       salary,
+      compensationType: compensationType || 'annual_salary',
       location,
       openings: openings || 1,
       status: 'Open'
@@ -427,6 +429,7 @@ router.put('/positions/:id', authMiddleware, [
   body('startDate').optional().isISO8601().toDate(),
   body('endDate').optional({ nullable: true }).isISO8601().toDate(),
   body('salary').optional().isFloat({ min: 0 }),
+  body('compensationType').optional().isIn(['annual_salary', 'daily_rate', 'hourly_rate']),
   body('location').optional().trim(),
   body('description').optional().trim(),
   body('requirements').optional().trim(),
@@ -457,7 +460,7 @@ router.put('/positions/:id', authMiddleware, [
     }
 
     // Update allowed fields
-    const { title, profession, description, requirements, startDate, endDate, salary, location, openings, status } = req.body;
+    const { title, profession, description, requirements, startDate, endDate, salary, compensationType, location, openings, status } = req.body;
     const updates = {};
     
     if (title) updates.title = title;
@@ -467,6 +470,7 @@ router.put('/positions/:id', authMiddleware, [
     if (startDate) updates.startDate = startDate;
     if (endDate !== undefined) updates.endDate = endDate;
     if (salary) updates.salary = salary;
+    if (compensationType) updates.compensationType = compensationType;
     if (location !== undefined) updates.location = location;
     if (openings) updates.openings = openings;
     if (status) updates.status = status;
