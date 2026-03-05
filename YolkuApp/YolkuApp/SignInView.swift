@@ -10,6 +10,7 @@ import SwiftUI
 struct SignInView: View {
     @Environment(\.dismiss) var dismiss
     @AppStorage("isLoggedIn") private var isLoggedIn = false
+    @AppStorage("userType") private var storedUserType = ""
     
     @State private var email = ""
     @State private var password = ""
@@ -17,6 +18,7 @@ struct SignInView: View {
     @State private var alertMessage = ""
     @State private var isLoading = false
     @State private var navigateToDashboard = false
+    @State private var selectedUserType = 0 // 0 = Healthcare Worker, 1 = Facility
     
     var body: some View {
         NavigationView {
@@ -58,6 +60,14 @@ struct SignInView: View {
                                     .foregroundColor(Color(hex: "666666"))
                             }
                             .padding(.top, 32)
+                            
+                            // Account type picker
+                            Picker("Account Type", selection: $selectedUserType) {
+                                Text("Healthcare Worker").tag(0)
+                                Text("Healthcare Facility").tag(1)
+                            }
+                            .pickerStyle(.segmented)
+                            .padding(.horizontal, 32)
                             
                             // Form
                             VStack(spacing: 20) {
@@ -186,7 +196,11 @@ struct SignInView: View {
                 Text(alertMessage)
             }
             .fullScreenCover(isPresented: $navigateToDashboard) {
-                DashboardView()
+                if storedUserType == "facility" {
+                    FacilityDashboardView()
+                } else {
+                    DashboardView()
+                }
             }
         }
     }
@@ -208,37 +222,84 @@ struct SignInView: View {
         
         isLoading = true
         
-        // Call the API
-        Task {
-            do {
-                let response = try await APIService.shared.signIn(
-                    email: email,
-                    password: password
-                )
-                
-                // Store auth token and user data securely
-                UserDefaults.standard.set(response.token, forKey: "authToken")
-                UserDefaults.standard.set(response.user.email, forKey: "userEmail")
-                UserDefaults.standard.set(response.user.firstName, forKey: "userFirstName")
-                UserDefaults.standard.set(response.user.profession ?? "Healthcare Professional", forKey: "userProfession")
-                
-                await MainActor.run {
-                    isLoading = false
-                    isLoggedIn = true
-                    alertMessage = "Sign in successful! Welcome back, \(response.user.firstName)!"
-                    showAlert = true
+        if selectedUserType == 1 {
+            // Facility sign-in
+            Task {
+                do {
+                    let response = try await APIService.shared.facilitySignIn(
+                        email: email,
+                        password: password
+                    )
+                    UserDefaults.standard.set(response.token, forKey: "authToken")
+                    UserDefaults.standard.set(response.facility.email, forKey: "facilityEmail")
+                    UserDefaults.standard.set(response.facility.name, forKey: "facilityName")
+                    UserDefaults.standard.set(response.facility.facilityType, forKey: "facilityType")
+                    UserDefaults.standard.set(response.facility.city, forKey: "facilityCity")
+                    UserDefaults.standard.set(response.facility.state, forKey: "facilityState")
+                    UserDefaults.standard.set(response.facility.address, forKey: "facilityAddress")
+                    if let phone = response.facility.phoneNumber {
+                        UserDefaults.standard.set(phone, forKey: "facilityPhone")
+                    }
+                    if let desc = response.facility.description {
+                        UserDefaults.standard.set(desc, forKey: "facilityDescription")
+                    }
+                    UserDefaults.standard.set("facility", forKey: "userType")
+                    await MainActor.run {
+                        isLoading = false
+                        storedUserType = "facility"
+                        isLoggedIn = true
+                        alertMessage = "Sign in successful! Welcome back, \(response.facility.name)!"
+                        showAlert = true
+                    }
+                } catch let error as APIError {
+                    await MainActor.run {
+                        isLoading = false
+                        alertMessage = error.localizedDescription
+                        showAlert = true
+                    }
+                } catch {
+                    await MainActor.run {
+                        isLoading = false
+                        alertMessage = "Network error. Please check your connection and try again."
+                        showAlert = true
+                    }
                 }
-            } catch let error as APIError {
-                await MainActor.run {
-                    isLoading = false
-                    alertMessage = error.localizedDescription
-                    showAlert = true
-                }
-            } catch {
-                await MainActor.run {
-                    isLoading = false
-                    alertMessage = "Network error. Please check your connection and try again."
-                    showAlert = true
+            }
+        } else {
+            // Healthcare worker sign-in
+            Task {
+                do {
+                    let response = try await APIService.shared.signIn(
+                        email: email,
+                        password: password
+                    )
+                    
+                    // Store auth token and user data securely
+                    UserDefaults.standard.set(response.token, forKey: "authToken")
+                    UserDefaults.standard.set(response.user.email, forKey: "userEmail")
+                    UserDefaults.standard.set(response.user.firstName, forKey: "userFirstName")
+                    UserDefaults.standard.set(response.user.profession ?? "Healthcare Professional", forKey: "userProfession")
+                    UserDefaults.standard.set("worker", forKey: "userType")
+                    
+                    await MainActor.run {
+                        isLoading = false
+                        storedUserType = "worker"
+                        isLoggedIn = true
+                        alertMessage = "Sign in successful! Welcome back, \(response.user.firstName)!"
+                        showAlert = true
+                    }
+                } catch let error as APIError {
+                    await MainActor.run {
+                        isLoading = false
+                        alertMessage = error.localizedDescription
+                        showAlert = true
+                    }
+                } catch {
+                    await MainActor.run {
+                        isLoading = false
+                        alertMessage = "Network error. Please check your connection and try again."
+                        showAlert = true
+                    }
                 }
             }
         }
