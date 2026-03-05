@@ -1015,7 +1015,7 @@ struct FacilityData: Codable {
 
 struct FacilityPosition: Codable, Identifiable {
     let id: String
-    let facilityId: String?
+    let facilityId: String
     let title: String
     let profession: String
     let description: String?

@@ -14,6 +14,7 @@ struct FacilityPositionsView: View {
     @State private var showingCreatePosition = false
     @State private var showDeleteAlert = false
     @State private var positionToDelete: FacilityPosition?
+    @State private var showDeleteErrorAlert = false
 
     var body: some View {
         NavigationView {
@@ -125,6 +126,11 @@ struct FacilityPositionsView: View {
             } message: {
                 Text("Are you sure you want to delete \"\(positionToDelete?.title ?? "this position")\"?")
             }
+            .alert("Delete Failed", isPresented: $showDeleteErrorAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Could not delete the position. Please try again.")
+            }
             .onAppear { loadPositions() }
         }
     }
@@ -159,7 +165,7 @@ struct FacilityPositionsView: View {
                 }
             } catch {
                 await MainActor.run {
-                    // Silently handle; keep position in list
+                    showDeleteErrorAlert = true
                 }
             }
         }
