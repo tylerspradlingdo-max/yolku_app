@@ -34,6 +34,10 @@
 		A1000047000000000000015 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000048000000000000015 /* ChatView.swift */; };
 		A1000049000000000000016 /* ChatConversationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000050000000000000016 /* ChatConversationView.swift */; };
 		A1000051000000000000017 /* AIJobMatcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000052000000000000017 /* AIJobMatcherView.swift */; };
+		FA000001000000000000001 /* FacilityDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000002000000000000001 /* FacilityDashboardView.swift */; };
+		FA000003000000000000002 /* FacilityPositionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000004000000000000002 /* FacilityPositionsView.swift */; };
+		FA000005000000000000003 /* FacilityProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000006000000000000003 /* FacilityProfileView.swift */; };
+		FA000007000000000000004 /* CreatePositionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000008000000000000004 /* CreatePositionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +69,10 @@
 		A1000048000000000000015 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		A1000050000000000000016 /* ChatConversationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatConversationView.swift; sourceTree = "<group>"; };
 		A1000052000000000000017 /* AIJobMatcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIJobMatcherView.swift; sourceTree = "<group>"; };
+		FA000002000000000000001 /* FacilityDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FacilityDashboardView.swift; sourceTree = "<group>"; };
+		FA000004000000000000002 /* FacilityPositionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FacilityPositionsView.swift; sourceTree = "<group>"; };
+		FA000006000000000000003 /* FacilityProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FacilityProfileView.swift; sourceTree = "<group>"; };
+		FA000008000000000000004 /* CreatePositionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePositionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +121,10 @@
 				A1000048000000000000015 /* ChatView.swift */,
 				A1000050000000000000016 /* ChatConversationView.swift */,
 				A1000052000000000000017 /* AIJobMatcherView.swift */,
+				FA000002000000000000001 /* FacilityDashboardView.swift */,
+				FA000004000000000000002 /* FacilityPositionsView.swift */,
+				FA000006000000000000003 /* FacilityProfileView.swift */,
+				FA000008000000000000004 /* CreatePositionView.swift */,
 				A1000016000000000000001 /* ColorExtension.swift */,
 				A1000018000000000000001 /* ButtonStyles.swift */,
 				A1000020000000000000001 /* Assets.xcassets */,
@@ -223,6 +235,10 @@
 				A1000047000000000000015 /* ChatView.swift in Sources */,
 				A1000049000000000000016 /* ChatConversationView.swift in Sources */,
 				A1000051000000000000017 /* AIJobMatcherView.swift in Sources */,
+				FA000001000000000000001 /* FacilityDashboardView.swift in Sources */,
+				FA000003000000000000002 /* FacilityPositionsView.swift in Sources */,
+				FA000005000000000000003 /* FacilityProfileView.swift in Sources */,
+				FA000007000000000000004 /* CreatePositionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
