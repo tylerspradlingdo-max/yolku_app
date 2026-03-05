@@ -19,6 +19,7 @@ struct CreatePositionView: View {
     @State private var hasEndDate = false
     @State private var endDate = Calendar.current.date(byAdding: .month, value: 3, to: Date()) ?? Date()
     @State private var salary = ""
+    @State private var compensationType = "annual_salary"
     @State private var location = ""
     @State private var openings = 1
     @State private var isLoading = false
@@ -26,6 +27,16 @@ struct CreatePositionView: View {
     @State private var alertMessage = ""
 
     let professions = ["RN", "LPN", "CNA", "Doctor", "PA", "NP", "Therapist", "Pharmacist", "Other"]
+
+    let compensationTypes: [(id: String, label: String, placeholder: String, keyboardType: UIKeyboardType)] = [
+        (id: "annual_salary", label: "Annual Salary ($) *", placeholder: "e.g. 75000",  keyboardType: .numberPad),
+        (id: "daily_rate",    label: "Daily Rate ($) *",   placeholder: "e.g. 350",    keyboardType: .decimalPad),
+        (id: "hourly_rate",   label: "Hourly Rate ($) *",  placeholder: "e.g. 45",     keyboardType: .decimalPad)
+    ]
+
+    private var selectedCompensation: (id: String, label: String, placeholder: String, keyboardType: UIKeyboardType) {
+        compensationTypes.first { $0.id == compensationType } ?? compensationTypes[0]
+    }
 
     private let isoFormatter: ISO8601DateFormatter = {
         let fmt = ISO8601DateFormatter()
@@ -99,8 +110,22 @@ struct CreatePositionView: View {
                         }
                     }
 
-                    // Salary
-                    FormField(label: "Annual Salary ($) *", text: $salary, placeholder: "e.g. 75000", keyboardType: .numberPad)
+                    // Compensation Type
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Compensation Type *")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Color(hex: "333333"))
+
+                        Picker("Select compensation type", selection: $compensationType) {
+                            ForEach(compensationTypes, id: \.id) { ct in
+                                Text(ct.label.replacingOccurrences(of: " *", with: "")).tag(ct.id)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+
+                    // Salary / Rate
+                    FormField(label: selectedCompensation.label, text: $salary, placeholder: selectedCompensation.placeholder, keyboardType: selectedCompensation.keyboardType)
 
                     // Number of Openings
                     VStack(alignment: .leading, spacing: 8) {
@@ -218,7 +243,7 @@ struct CreatePositionView: View {
             return "Please select a profession."
         }
         if salary.trimmingCharacters(in: .whitespaces).isEmpty {
-            return "Please enter an annual salary."
+            return "Please enter a \(selectedCompensation.label.replacingOccurrences(of: " ($) *", with: "").lowercased())."
         }
         if Double(salary) == nil {
             return "Please enter a valid salary amount."
@@ -244,6 +269,7 @@ struct CreatePositionView: View {
                     startDate: startDateStr,
                     endDate: endDateStr,
                     salary: salaryValue,
+                    compensationType: compensationType,
                     location: location.isEmpty ? nil : location,
                     openings: openings
                 )
