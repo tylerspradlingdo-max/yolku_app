@@ -31,6 +31,7 @@ struct Document: Identifiable, Codable {
 enum DocumentType: String, Codable, CaseIterable {
     case medicalLicense = "Medical License"
     case nursingLicense = "Nursing License"
+    case dea = "DEA Certificate"
     case certification = "Certification"
     case resume = "Resume/CV"
     case immunization = "Immunization Records"
@@ -42,6 +43,8 @@ enum DocumentType: String, Codable, CaseIterable {
         switch self {
         case .medicalLicense, .nursingLicense:
             return "cross.case.fill"
+        case .dea:
+            return "pill.fill"
         case .certification:
             return "rosette"
         case .resume:
@@ -61,6 +64,8 @@ enum DocumentType: String, Codable, CaseIterable {
         switch self {
         case .medicalLicense, .nursingLicense:
             return Color(hex: "667eea")
+        case .dea:
+            return Color(hex: "e74c3c")
         case .certification:
             return Color(hex: "764ba2")
         case .resume:

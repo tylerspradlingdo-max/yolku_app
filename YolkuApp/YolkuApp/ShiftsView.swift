@@ -464,6 +464,7 @@ struct DateRangeFilterSheet: View {
 // Shift Card Component
 struct ShiftCard: View {
     let position: Position
+    @State private var showingApplySheet = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -528,7 +529,7 @@ struct ShiftCard: View {
                 }
             }
             
-            Button(action: {}) {
+            Button(action: { showingApplySheet = true }) {
                 Text("Apply Now")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
@@ -548,6 +549,9 @@ struct ShiftCard: View {
         .background(Color.white)
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
+        .sheet(isPresented: $showingApplySheet) {
+            ApplyNowView(position: position)
+        }
     }
 }
 
