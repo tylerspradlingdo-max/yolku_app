@@ -9,12 +9,17 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("isLoggedIn") private var isLoggedIn = false
+    @AppStorage("userType") private var userType = ""
     @State private var showMenu = false
     @State private var showSignIn = false
     
     var body: some View {
         if isLoggedIn {
-            DashboardView()
+            if userType == "facility" {
+                FacilityDashboardView()
+            } else {
+                DashboardView()
+            }
         } else {
             NavigationView {
                 ScrollView {

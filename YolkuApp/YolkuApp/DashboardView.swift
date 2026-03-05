@@ -87,6 +87,7 @@ struct DashboardView: View {
         userEmail = ""
         userProfession = ""
         UserDefaults.standard.removeObject(forKey: "authToken")
+        UserDefaults.standard.removeObject(forKey: "userType")
     }
 }
 

@@ -188,6 +188,197 @@ class APIService {
         return profileResponse.user
     }
     
+    func facilitySignIn(email: String, password: String) async throws -> FacilityAuthResponse {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 1_000_000_000)
+            return FacilityAuthResponse(
+                message: "Signed in successfully (Mock Mode)",
+                token: "mock_facility_token_\(UUID().uuidString)",
+                facility: FacilityData(
+                    id: UUID().uuidString,
+                    name: "Demo Medical Center",
+                    email: email,
+                    address: "123 Main St",
+                    city: "San Francisco",
+                    state: "CA",
+                    zipCode: "94102",
+                    phoneNumber: "555-0199",
+                    facilityType: "Hospital",
+                    description: "A demo healthcare facility.",
+                    isActive: true,
+                    createdAt: ISO8601DateFormatter().string(from: Date()),
+                    updatedAt: ISO8601DateFormatter().string(from: Date())
+                )
+            )
+        }
+
+        guard let url = URL(string: APIConfig.Facilities.signIn) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(SignInRequest(email: email, password: password))
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.error)
+            }
+            throw APIError.serverError("Facility sign in failed with status code: \(httpResponse.statusCode)")
+        }
+        let facilityResponse = try JSONDecoder().decode(FacilitySignInAPIResponse.self, from: data)
+        return FacilityAuthResponse(
+            message: facilityResponse.message,
+            token: facilityResponse.data.token,
+            facility: facilityResponse.data.facility
+        )
+    }
+
+    func getFacilityPositions(token: String) async throws -> [FacilityPosition] {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 500_000_000)
+            return generateMockFacilityPositions()
+        }
+        guard let url = URL(string: APIConfig.Facilities.positions) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.invalidResponse
+        }
+        let result = try JSONDecoder().decode(FacilityPositionsResponse.self, from: data)
+        return result.data
+    }
+
+    func createFacilityPosition(
+        token: String,
+        title: String,
+        profession: String,
+        description: String?,
+        requirements: String?,
+        startDate: String,
+        endDate: String?,
+        salary: Double,
+        location: String?,
+        openings: Int
+    ) async throws -> FacilityPosition {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 800_000_000)
+            let now = ISO8601DateFormatter().string(from: Date())
+            return FacilityPosition(
+                id: UUID().uuidString,
+                facilityId: "mock-facility-id",
+                title: title,
+                profession: profession,
+                description: description,
+                requirements: requirements,
+                startDate: startDate,
+                endDate: endDate,
+                salary: salary,
+                location: location,
+                openings: openings,
+                status: "Open",
+                createdAt: now,
+                updatedAt: now
+            )
+        }
+        guard let url = URL(string: APIConfig.Facilities.positions) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let body = CreatePositionRequest(
+            title: title,
+            profession: profession,
+            description: description,
+            requirements: requirements,
+            startDate: startDate,
+            endDate: endDate,
+            salary: salary,
+            location: location,
+            openings: openings
+        )
+        request.httpBody = try JSONEncoder().encode(body)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.error)
+            }
+            throw APIError.serverError("Failed to create position")
+        }
+        let result = try JSONDecoder().decode(FacilityPositionResponse.self, from: data)
+        return result.data
+    }
+
+    func deleteFacilityPosition(token: String, positionId: String) async throws {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 300_000_000)
+            return
+        }
+        guard let url = URL(string: APIConfig.Facilities.position(id: positionId)) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (_, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.serverError("Failed to delete position")
+        }
+    }
+
+    private func generateMockFacilityPositions() -> [FacilityPosition] {
+        let now = ISO8601DateFormatter().string(from: Date())
+        let isoFormatter = ISO8601DateFormatter()
+        let startDate1 = isoFormatter.string(from: Calendar.current.date(byAdding: .day, value: 7, to: Date())!)
+        let startDate2 = isoFormatter.string(from: Calendar.current.date(byAdding: .day, value: 14, to: Date())!)
+        return [
+            FacilityPosition(
+                id: "mock-fpos-1",
+                facilityId: "mock-facility-id",
+                title: "RN - Day Shift",
+                profession: "RN",
+                description: "Seeking an experienced RN for day shift in the ICU.",
+                requirements: "Active RN license. Minimum 2 years experience.",
+                startDate: startDate1,
+                endDate: nil,
+                salary: 85000,
+                location: "San Francisco, CA",
+                openings: 2,
+                status: "Open",
+                createdAt: now,
+                updatedAt: now
+            ),
+            FacilityPosition(
+                id: "mock-fpos-2",
+                facilityId: "mock-facility-id",
+                title: "CNA - Night Shift",
+                profession: "CNA",
+                description: "Certified Nursing Assistant needed for overnight care.",
+                requirements: "Current CNA certification required.",
+                startDate: startDate2,
+                endDate: nil,
+                salary: 45000,
+                location: "San Francisco, CA",
+                openings: 1,
+                status: "Open",
+                createdAt: now,
+                updatedAt: now
+            )
+        ]
+    }
+
     func facilitySignUp(
         name: String,
         email: String,
@@ -736,6 +927,18 @@ struct FacilitySignUpRequest: Codable {
     let description: String?
 }
 
+struct CreatePositionRequest: Codable {
+    let title: String
+    let profession: String
+    let description: String?
+    let requirements: String?
+    let startDate: String
+    let endDate: String?
+    let salary: Double
+    let location: String?
+    let openings: Int
+}
+
 // MARK: - Response Models
 
 struct AuthResponse: Codable {
@@ -781,6 +984,12 @@ struct FacilitySignUpAPIResponse: Codable {
     let data: FacilitySignUpData
 }
 
+struct FacilitySignInAPIResponse: Codable {
+    let success: Bool
+    let message: String
+    let data: FacilitySignUpData
+}
+
 struct FacilitySignUpData: Codable {
     let facility: FacilityData
     let token: String
@@ -800,6 +1009,58 @@ struct FacilityData: Codable {
     let isActive: Bool
     let createdAt: String
     let updatedAt: String
+}
+
+// MARK: - Facility Position Models
+
+struct FacilityPosition: Codable, Identifiable {
+    let id: String
+    let facilityId: String?
+    let title: String
+    let profession: String
+    let description: String?
+    let requirements: String?
+    let startDate: String
+    let endDate: String?
+    let salary: Double
+    let location: String?
+    let openings: Int
+    let status: String
+    let createdAt: String
+    let updatedAt: String
+
+    var formattedSalary: String {
+        String(format: "$%.0f/yr", salary)
+    }
+
+    var formattedStartDate: String {
+        let isoFmt = ISO8601DateFormatter()
+        isoFmt.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let date = isoFmt.date(from: startDate) ?? {
+            isoFmt.formatOptions = [.withInternetDateTime]
+            return isoFmt.date(from: startDate)
+        }() ?? {
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+            return df.date(from: startDate)
+        }()
+        guard let date else { return startDate }
+        let df = DateFormatter()
+        df.dateFormat = "MMM d, yyyy"
+        return df.string(from: date)
+    }
+}
+
+struct FacilityPositionsResponse: Codable {
+    let success: Bool
+    let count: Int
+    let data: [FacilityPosition]
+}
+
+struct FacilityPositionResponse: Codable {
+    let success: Bool
+    let message: String
+    let data: FacilityPosition
 }
 
 // MARK: - Position Models

@@ -10,6 +10,7 @@ import SwiftUI
 struct HealthcareFacilitySignUpView: View {
     @Environment(\.dismiss) var dismiss
     @AppStorage("isLoggedIn") private var isLoggedIn = false
+    @AppStorage("userType") private var storedUserType = ""
     
     @State private var facilityName = ""
     @State private var email = ""
@@ -217,7 +218,7 @@ struct HealthcareFacilitySignUpView: View {
                 Text(alertMessage)
             }
             .fullScreenCover(isPresented: $navigateToDashboard) {
-                DashboardView()
+                FacilityDashboardView()
             }
         }
     }
@@ -252,10 +253,21 @@ struct HealthcareFacilitySignUpView: View {
                 UserDefaults.standard.set(response.token, forKey: "authToken")
                 UserDefaults.standard.set(response.facility.email, forKey: "facilityEmail")
                 UserDefaults.standard.set(response.facility.name, forKey: "facilityName")
+                UserDefaults.standard.set(response.facility.facilityType, forKey: "facilityType")
+                UserDefaults.standard.set(response.facility.city, forKey: "facilityCity")
+                UserDefaults.standard.set(response.facility.state, forKey: "facilityState")
+                UserDefaults.standard.set(response.facility.address, forKey: "facilityAddress")
+                if let phone = response.facility.phoneNumber {
+                    UserDefaults.standard.set(phone, forKey: "facilityPhone")
+                }
+                if let desc = response.facility.description {
+                    UserDefaults.standard.set(desc, forKey: "facilityDescription")
+                }
                 UserDefaults.standard.set("facility", forKey: "userType")
                 
                 await MainActor.run {
                     isLoading = false
+                    storedUserType = "facility"
                     isLoggedIn = true
                     alertMessage = "Account created successfully! Welcome to Yolku, \(response.facility.name)!"
                     showAlert = true

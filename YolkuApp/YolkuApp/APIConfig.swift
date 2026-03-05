@@ -66,4 +66,13 @@ struct APIConfig {
         static let match = "\(baseURL)\(apiPath)/ai/match"
         static let professions = "\(baseURL)\(apiPath)/ai/professions"
     }
+    
+    struct Facilities {
+        static let signIn = "\(baseURL)\(apiPath)/facilities/signin"
+        static let profile = "\(baseURL)\(apiPath)/facilities/profile"
+        static let positions = "\(baseURL)\(apiPath)/facilities/positions"
+        static func position(id: String) -> String {
+            return "\(baseURL)\(apiPath)/facilities/positions/\(id)"
+        }
+    }
 }
