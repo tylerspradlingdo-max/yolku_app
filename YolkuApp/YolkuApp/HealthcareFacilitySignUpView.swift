@@ -251,6 +251,7 @@ struct HealthcareFacilitySignUpView: View {
                 
                 // Store auth token and facility data securely
                 UserDefaults.standard.set(response.token, forKey: "authToken")
+                UserDefaults.standard.set(response.facility.id, forKey: "facilityId")
                 UserDefaults.standard.set(response.facility.email, forKey: "facilityEmail")
                 UserDefaults.standard.set(response.facility.name, forKey: "facilityName")
                 UserDefaults.standard.set(response.facility.facilityType, forKey: "facilityType")
