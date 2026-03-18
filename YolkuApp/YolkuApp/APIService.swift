@@ -241,7 +241,12 @@ class APIService {
     func getFacilityPositions(token: String) async throws -> [FacilityPosition] {
         if APIConfig.useMockMode {
             try await Task.sleep(nanoseconds: 500_000_000)
-            return generateMockFacilityPositions()
+            // facilityId is the authoritative key (stored on sign-in/sign-up).
+            // facilityEmail is a stable fallback for sessions that predate the facilityId storage.
+            let facilityId = UserDefaults.standard.string(forKey: "facilityId")
+                ?? UserDefaults.standard.string(forKey: "facilityEmail")
+                ?? "mock-facility"
+            return JobDatabase.shared.positions(forFacilityId: facilityId).map { $0.position }
         }
         guard let url = URL(string: APIConfig.Facilities.positions) else {
             throw APIError.invalidURL
@@ -273,9 +278,12 @@ class APIService {
         if APIConfig.useMockMode {
             try await Task.sleep(nanoseconds: 800_000_000)
             let now = ISO8601DateFormatter().string(from: Date())
-            return FacilityPosition(
+            let facilityId = UserDefaults.standard.string(forKey: "facilityId")
+                ?? UserDefaults.standard.string(forKey: "facilityEmail")
+                ?? "mock-facility"
+            let newPosition = FacilityPosition(
                 id: UUID().uuidString,
-                facilityId: "mock-facility-id",
+                facilityId: facilityId,
                 title: title,
                 profession: profession,
                 description: description,
@@ -290,6 +298,15 @@ class APIService {
                 createdAt: now,
                 updatedAt: now
             )
+            let stored = StoredJobPosition(
+                position: newPosition,
+                facilityName: UserDefaults.standard.string(forKey: "facilityName") ?? "Healthcare Facility",
+                facilityCity: UserDefaults.standard.string(forKey: "facilityCity") ?? "",
+                facilityState: UserDefaults.standard.string(forKey: "facilityState") ?? "",
+                facilityType: UserDefaults.standard.string(forKey: "facilityType") ?? "Hospital"
+            )
+            JobDatabase.shared.save(stored)
+            return newPosition
         }
         guard let url = URL(string: APIConfig.Facilities.positions) else {
             throw APIError.invalidURL
@@ -326,6 +343,7 @@ class APIService {
     func deleteFacilityPosition(token: String, positionId: String) async throws {
         if APIConfig.useMockMode {
             try await Task.sleep(nanoseconds: 300_000_000)
+            JobDatabase.shared.delete(id: positionId)
             return
         }
         guard let url = URL(string: APIConfig.Facilities.position(id: positionId)) else {
@@ -339,49 +357,6 @@ class APIService {
               (200...299).contains(httpResponse.statusCode) else {
             throw APIError.serverError("Failed to delete position")
         }
-    }
-
-    private func generateMockFacilityPositions() -> [FacilityPosition] {
-        let now = ISO8601DateFormatter().string(from: Date())
-        let isoFormatter = ISO8601DateFormatter()
-        let startDate1 = isoFormatter.string(from: Calendar.current.date(byAdding: .day, value: 7, to: Date())!)
-        let startDate2 = isoFormatter.string(from: Calendar.current.date(byAdding: .day, value: 14, to: Date())!)
-        return [
-            FacilityPosition(
-                id: "mock-fpos-1",
-                facilityId: "mock-facility-id",
-                title: "RN - Day Shift",
-                profession: "RN",
-                description: "Seeking an experienced RN for day shift in the ICU.",
-                requirements: "Active RN license. Minimum 2 years experience.",
-                startDate: startDate1,
-                endDate: nil,
-                salary: 85000,
-                compensationType: "annual_salary",
-                location: "San Francisco, CA",
-                openings: 2,
-                status: "Open",
-                createdAt: now,
-                updatedAt: now
-            ),
-            FacilityPosition(
-                id: "mock-fpos-2",
-                facilityId: "mock-facility-id",
-                title: "CNA - Night Shift",
-                profession: "CNA",
-                description: "Certified Nursing Assistant needed for overnight care.",
-                requirements: "Current CNA certification required.",
-                startDate: startDate2,
-                endDate: nil,
-                salary: 45000,
-                compensationType: "annual_salary",
-                location: "San Francisco, CA",
-                openings: 1,
-                status: "Open",
-                createdAt: now,
-                updatedAt: now
-            )
-        ]
     }
 
     func facilitySignUp(
@@ -471,13 +446,10 @@ class APIService {
     // MARK: - Positions
     
     func getPositions(state: String? = nil, startDate: String? = nil, endDate: String? = nil, profession: String? = nil) async throws -> [Position] {
-        // Mock mode - return fake positions
+        // Mock mode - return positions from the local job database
         if APIConfig.useMockMode {
-            // Simulate network delay
             try await Task.sleep(nanoseconds: 800_000_000) // 0.8 seconds
-            
-            // Generate mock positions
-            return generateMockPositions(state: state, startDate: startDate, endDate: endDate, profession: profession)
+            return databasePositionsForWorker(state: state, startDate: startDate, endDate: endDate, profession: profession)
         }
         
         // Real API mode - connect to server
@@ -855,52 +827,83 @@ class APIService {
         )
     }
 
-    // Helper to generate mock positions
-    private func generateMockPositions(state: String?, startDate: String?, endDate: String?, profession: String?) -> [Position] {
-        let facilities = [
-            Facility(id: "1", name: "General Hospital", city: "San Francisco", state: "CA", facilityType: "Hospital"),
-            Facility(id: "2", name: "City Medical Center", city: "Los Angeles", state: "CA", facilityType: "Hospital"),
-            Facility(id: "3", name: "Community Nursing Home", city: "Sacramento", state: "CA", facilityType: "Nursing Home"),
-            Facility(id: "4", name: "NYC Healthcare Center", city: "New York", state: "NY", facilityType: "Hospital"),
-            Facility(id: "5", name: "Sunset Urgent Care", city: "San Diego", state: "CA", facilityType: "Urgent Care"),
-            Facility(id: "6", name: "Austin Medical Clinic", city: "Austin", state: "TX", facilityType: "Clinic")
-        ]
-        
-        let professions = ["RN", "LPN", "CNA", "NP", "PA", "Therapist"]
-        let today = Date()
-        var positions: [Position] = []
-        
-        for i in 0..<20 {
-            let randomFacility = facilities.randomElement()!
-            let randomProfession = professions.randomElement()!
-            let daysAhead = Int.random(in: 0...30)
-            let shiftDate = Calendar.current.date(byAdding: .day, value: daysAhead, to: today)!
-            
-            // Apply filters
-            if let filterState = state, randomFacility.state != filterState {
-                continue
+    // MARK: - Database-backed helper for worker position browsing
+
+    /// Converts all positions in `JobDatabase` into the `Position` format
+    /// used by the healthcare-worker side of the app, applying any optional
+    /// filters for state, profession, and date range.
+    private func databasePositionsForWorker(
+        state: String?,
+        startDate: String?,
+        endDate: String?,
+        profession: String?
+    ) -> [Position] {
+        return JobDatabase.shared.allPositions()
+            .compactMap { stored -> Position? in
+                let pos = stored.position
+
+                // State filter
+                if let filterState = state, stored.facilityState != filterState {
+                    return nil
+                }
+                // Profession filter
+                if let filterProfession = profession, pos.profession != filterProfession {
+                    return nil
+                }
+
+                // Extract the date-only portion from the ISO-8601 startDate
+                let shiftDateStr = String(pos.startDate.prefix(10))
+
+                // Date range filter (inclusive bounds, comparing "yyyy-MM-dd" strings)
+                if let sd = startDate, shiftDateStr < sd { return nil }
+                if let ed = endDate,   shiftDateStr > ed { return nil }
+
+                // Convert salary to an hourly rate for display
+                let hourlyRate: Double
+                switch pos.compensationType {
+                case "hourly_rate":
+                    hourlyRate = pos.salary
+                case "daily_rate":
+                    hourlyRate = pos.salary / 8.0
+                default: // annual_salary
+                    hourlyRate = pos.salary / 2080.0
+                }
+
+                // Derive shift window from the position title.
+                // FacilityPosition does not capture shift times, so we use
+                // keyword hints in the title as the best available signal.
+                let titleLower = pos.title.lowercased()
+                let (shiftStart, shiftEnd): (String, String)
+                if titleLower.contains("night") {
+                    (shiftStart, shiftEnd) = ("19:00:00", "07:00:00")
+                } else if titleLower.contains("evening") || titleLower.contains("pm") {
+                    (shiftStart, shiftEnd) = ("15:00:00", "23:00:00")
+                } else {
+                    (shiftStart, shiftEnd) = ("07:00:00", "15:00:00")
+                }
+
+                return Position(
+                    id: pos.id,
+                    facility: Facility(
+                        id: pos.facilityId,
+                        name: stored.facilityName,
+                        city: stored.facilityCity,
+                        state: stored.facilityState,
+                        facilityType: stored.facilityType
+                    ),
+                    title: pos.title,
+                    profession: pos.profession,
+                    shiftDate: shiftDateStr,
+                    shiftStartTime: shiftStart,
+                    shiftEndTime: shiftEnd,
+                    hourlyRate: hourlyRate,
+                    openings: pos.openings
+                )
             }
-            if let filterProfession = profession, randomProfession != filterProfession {
-                continue
-            }
-            
-            let position = Position(
-                id: "mock-\(i)",
-                facility: randomFacility,
-                title: "\(randomProfession) - \(["Day", "Night", "Evening"].randomElement()!) Shift",
-                profession: randomProfession,
-                shiftDate: ISO8601DateFormatter().string(from: shiftDate).split(separator: "T").first.map(String.init) ?? "",
-                shiftStartTime: ["07:00:00", "15:00:00", "19:00:00"].randomElement()!,
-                shiftEndTime: ["15:00:00", "23:00:00", "07:00:00"].randomElement()!,
-                hourlyRate: Double.random(in: 25...85),
-                openings: Int.random(in: 1...3)
-            )
-            positions.append(position)
-        }
-        
-        return positions.sorted { $0.shiftDate < $1.shiftDate }
+            .sorted { $0.shiftDate < $1.shiftDate }
     }
 }
+
 
 // MARK: - Request Models
 
