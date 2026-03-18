@@ -38,6 +38,7 @@
 		FA000003000000000000002 /* FacilityPositionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000004000000000000002 /* FacilityPositionsView.swift */; };
 		FA000005000000000000003 /* FacilityProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000006000000000000003 /* FacilityProfileView.swift */; };
 		FA000007000000000000004 /* CreatePositionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000008000000000000004 /* CreatePositionView.swift */; };
+		FA000009000000000000005 /* JobDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000010000000000000005 /* JobDatabase.swift */; };
 		AN000001000000000000001 /* ApplyNowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AN000002000000000000001 /* ApplyNowView.swift */; };
 /* End PBXBuildFile section */
 
@@ -74,6 +75,7 @@
 		FA000004000000000000002 /* FacilityPositionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FacilityPositionsView.swift; sourceTree = "<group>"; };
 		FA000006000000000000003 /* FacilityProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FacilityProfileView.swift; sourceTree = "<group>"; };
 		FA000008000000000000004 /* CreatePositionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePositionView.swift; sourceTree = "<group>"; };
+		FA000010000000000000005 /* JobDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobDatabase.swift; sourceTree = "<group>"; };
 		AN000002000000000000001 /* ApplyNowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplyNowView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -127,6 +129,7 @@
 				FA000004000000000000002 /* FacilityPositionsView.swift */,
 				FA000006000000000000003 /* FacilityProfileView.swift */,
 				FA000008000000000000004 /* CreatePositionView.swift */,
+				FA000010000000000000005 /* JobDatabase.swift */,
 				AN000002000000000000001 /* ApplyNowView.swift */,
 				A1000016000000000000001 /* ColorExtension.swift */,
 				A1000018000000000000001 /* ButtonStyles.swift */,
@@ -242,6 +245,7 @@
 				FA000003000000000000002 /* FacilityPositionsView.swift in Sources */,
 				FA000005000000000000003 /* FacilityProfileView.swift in Sources */,
 				FA000007000000000000004 /* CreatePositionView.swift in Sources */,
+				FA000009000000000000005 /* JobDatabase.swift in Sources */,
 				AN000001000000000000001 /* ApplyNowView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
