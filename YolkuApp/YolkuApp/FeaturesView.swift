@@ -22,9 +22,9 @@ struct FeaturesView: View {
             description: "Match with healthcare facilities in real-time. Find shifts that fit your schedule and expertise instantly."
         ),
         FeatureCard(
-            icon: "🔒",
-            title: "Secure & Compliant",
-            description: "HIPAA-compliant platform ensuring your data and patient information remain secure and protected."
+            icon: "✅",
+            title: "All-in-One Convenience",
+            description: "Find positions, apply directly, message facilities, and discover housing — everything you need for your next healthcare role, all in one convenient app."
         ),
         FeatureCard(
             icon: "📱",
