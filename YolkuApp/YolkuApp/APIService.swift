@@ -340,6 +340,86 @@ class APIService {
         return result.data
     }
 
+    func updateFacilityPosition(
+        token: String,
+        positionId: String,
+        title: String,
+        profession: String,
+        description: String?,
+        requirements: String?,
+        startDate: String,
+        endDate: String?,
+        salary: Double,
+        compensationType: String,
+        location: String?,
+        openings: Int
+    ) async throws -> FacilityPosition {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 800_000_000)
+            let now = ISO8601DateFormatter().string(from: Date())
+            let facilityId = UserDefaults.standard.string(forKey: "facilityId")
+                ?? UserDefaults.standard.string(forKey: "facilityEmail")
+                ?? "mock-facility"
+            let existing = JobDatabase.shared.allPositions().first { $0.id == positionId }
+            let updated = FacilityPosition(
+                id: positionId,
+                facilityId: facilityId,
+                title: title,
+                profession: profession,
+                description: description,
+                requirements: requirements,
+                startDate: startDate,
+                endDate: endDate,
+                salary: salary,
+                compensationType: compensationType,
+                location: location,
+                openings: openings,
+                status: existing?.position.status ?? "Open",
+                createdAt: existing?.position.createdAt ?? now,
+                updatedAt: now
+            )
+            let stored = StoredJobPosition(
+                position: updated,
+                facilityName: existing?.facilityName ?? UserDefaults.standard.string(forKey: "facilityName") ?? "Healthcare Facility",
+                facilityCity: existing?.facilityCity ?? UserDefaults.standard.string(forKey: "facilityCity") ?? "",
+                facilityState: existing?.facilityState ?? UserDefaults.standard.string(forKey: "facilityState") ?? "",
+                facilityType: existing?.facilityType ?? UserDefaults.standard.string(forKey: "facilityType") ?? "Hospital"
+            )
+            JobDatabase.shared.save(stored)
+            return updated
+        }
+        guard let url = URL(string: APIConfig.Facilities.position(id: positionId)) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let body = CreatePositionRequest(
+            title: title,
+            profession: profession,
+            description: description,
+            requirements: requirements,
+            startDate: startDate,
+            endDate: endDate,
+            salary: salary,
+            compensationType: compensationType,
+            location: location,
+            openings: openings
+        )
+        request.httpBody = try JSONEncoder().encode(body)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.error)
+            }
+            throw APIError.serverError("Failed to update position")
+        }
+        let result = try JSONDecoder().decode(FacilityPositionResponse.self, from: data)
+        return result.data
+    }
+
     func deleteFacilityPosition(token: String, positionId: String) async throws {
         if APIConfig.useMockMode {
             try await Task.sleep(nanoseconds: 300_000_000)
