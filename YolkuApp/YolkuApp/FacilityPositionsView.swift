@@ -15,6 +15,7 @@ struct FacilityPositionsView: View {
     @State private var showDeleteAlert = false
     @State private var positionToDelete: FacilityPosition?
     @State private var showDeleteErrorAlert = false
+    @State private var positionToEdit: FacilityPosition?
 
     var body: some View {
         NavigationView {
@@ -80,18 +81,21 @@ struct FacilityPositionsView: View {
                 } else {
                     List {
                         ForEach(positions) { position in
-                            PositionCard(position: position)
-                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                    Button(role: .destructive) {
-                                        positionToDelete = position
-                                        showDeleteAlert = true
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
+                            Button(action: { positionToEdit = position }) {
+                                PositionCard(position: position)
+                            }
+                            .buttonStyle(.plain)
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    positionToDelete = position
+                                    showDeleteAlert = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
                                 }
+                            }
                         }
                     }
                     .listStyle(.plain)
@@ -114,6 +118,13 @@ struct FacilityPositionsView: View {
             .sheet(isPresented: $showingCreatePosition) {
                 CreatePositionView { newPosition in
                     positions.insert(newPosition, at: 0)
+                }
+            }
+            .sheet(item: $positionToEdit) { position in
+                CreatePositionView(existingPosition: position) { updatedPosition in
+                    if let idx = positions.firstIndex(where: { $0.id == updatedPosition.id }) {
+                        positions[idx] = updatedPosition
+                    }
                 }
             }
             .alert("Delete Position", isPresented: $showDeleteAlert) {

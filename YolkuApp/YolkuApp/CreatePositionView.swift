@@ -9,7 +9,13 @@ import SwiftUI
 
 struct CreatePositionView: View {
     @Environment(\.dismiss) var dismiss
+    let existingPosition: FacilityPosition?
     let onCreated: (FacilityPosition) -> Void
+
+    init(existingPosition: FacilityPosition? = nil, onCreated: @escaping (FacilityPosition) -> Void) {
+        self.existingPosition = existingPosition
+        self.onCreated = onCreated
+    }
 
     @State private var title = ""
     @State private var profession = ""
@@ -25,6 +31,8 @@ struct CreatePositionView: View {
     @State private var isLoading = false
     @State private var showAlert = false
     @State private var alertMessage = ""
+
+    private var isEditing: Bool { existingPosition != nil }
 
     let professions = ["RN", "LPN", "CNA", "Doctor", "PA", "NP", "Therapist", "Pharmacist", "Other"]
 
@@ -78,7 +86,7 @@ struct CreatePositionView: View {
                         Text("Start Date *")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(Color(hex: "333333"))
-                        DatePicker("Start Date", selection: $startDate, in: Date()..., displayedComponents: .date)
+                        DatePicker("Start Date", selection: $startDate, in: isEditing ? Date.distantPast...Date.distantFuture : Date()..., displayedComponents: .date)
                             .datePickerStyle(.compact)
                             .labelsHidden()
                             .padding()
@@ -186,7 +194,7 @@ struct CreatePositionView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)
                         } else {
-                            Text("Create Position")
+                            Text(isEditing ? "Save Changes" : "Create Position")
                                 .font(.system(size: 18, weight: .semibold))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
@@ -210,7 +218,7 @@ struct CreatePositionView: View {
                 .padding(.top, 16)
             }
             .background(Color(hex: "f8f9fa"))
-            .navigationTitle("New Position")
+            .navigationTitle(isEditing ? "Edit Position" : "New Position")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -218,11 +226,33 @@ struct CreatePositionView: View {
                         .foregroundColor(Color(hex: "667eea"))
                 }
             }
-            .alert("Create Position", isPresented: $showAlert) {
+            .alert(isEditing ? "Edit Position" : "Create Position", isPresented: $showAlert) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(alertMessage)
             }
+            .onAppear { prefillIfEditing() }
+        }
+    }
+
+    private func prefillIfEditing() {
+        guard let p = existingPosition else { return }
+        title = p.title
+        profession = p.profession
+        positionDescription = p.description ?? ""
+        requirements = p.requirements ?? ""
+        compensationType = p.compensationType
+        salary = p.compensationType == "annual_salary"
+            ? String(format: "%.0f", p.salary)
+            : String(format: "%.2f", p.salary)
+        location = p.location ?? ""
+        openings = p.openings
+        if let parsed = isoFormatter.date(from: p.startDate) {
+            startDate = parsed
+        }
+        if let endStr = p.endDate, let parsed = isoFormatter.date(from: endStr) {
+            hasEndDate = true
+            endDate = parsed
         }
     }
 
@@ -260,19 +290,37 @@ struct CreatePositionView: View {
 
         Task {
             do {
-                let position = try await APIService.shared.createFacilityPosition(
-                    token: token,
-                    title: title.trimmingCharacters(in: .whitespaces),
-                    profession: profession,
-                    description: positionDescription.isEmpty ? nil : positionDescription,
-                    requirements: requirements.isEmpty ? nil : requirements,
-                    startDate: startDateStr,
-                    endDate: endDateStr,
-                    salary: salaryValue,
-                    compensationType: compensationType,
-                    location: location.isEmpty ? nil : location,
-                    openings: openings
-                )
+                let position: FacilityPosition
+                if let existing = existingPosition {
+                    position = try await APIService.shared.updateFacilityPosition(
+                        token: token,
+                        positionId: existing.id,
+                        title: title.trimmingCharacters(in: .whitespaces),
+                        profession: profession,
+                        description: positionDescription.isEmpty ? nil : positionDescription,
+                        requirements: requirements.isEmpty ? nil : requirements,
+                        startDate: startDateStr,
+                        endDate: endDateStr,
+                        salary: salaryValue,
+                        compensationType: compensationType,
+                        location: location.isEmpty ? nil : location,
+                        openings: openings
+                    )
+                } else {
+                    position = try await APIService.shared.createFacilityPosition(
+                        token: token,
+                        title: title.trimmingCharacters(in: .whitespaces),
+                        profession: profession,
+                        description: positionDescription.isEmpty ? nil : positionDescription,
+                        requirements: requirements.isEmpty ? nil : requirements,
+                        startDate: startDateStr,
+                        endDate: endDateStr,
+                        salary: salaryValue,
+                        compensationType: compensationType,
+                        location: location.isEmpty ? nil : location,
+                        openings: openings
+                    )
+                }
                 await MainActor.run {
                     isLoading = false
                     onCreated(position)
@@ -287,7 +335,7 @@ struct CreatePositionView: View {
             } catch {
                 await MainActor.run {
                     isLoading = false
-                    alertMessage = "Failed to create position. Please try again."
+                    alertMessage = isEditing ? "Failed to update position. Please try again." : "Failed to create position. Please try again."
                     showAlert = true
                 }
             }
