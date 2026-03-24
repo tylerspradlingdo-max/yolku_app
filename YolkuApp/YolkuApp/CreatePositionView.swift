@@ -86,7 +86,7 @@ struct CreatePositionView: View {
                         Text("Start Date *")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(Color(hex: "333333"))
-                        DatePicker("Start Date", selection: $startDate, in: isEditing ? Date.distantPast...Date.distantFuture : Date()..., displayedComponents: .date)
+                        DatePicker("Start Date", selection: $startDate, in: isEditing ? Date.distantPast...Date.distantFuture : Date()...Date.distantFuture, displayedComponents: .date)
                             .datePickerStyle(.compact)
                             .labelsHidden()
                             .padding()
