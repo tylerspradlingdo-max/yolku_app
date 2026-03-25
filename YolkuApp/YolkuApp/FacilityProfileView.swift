@@ -20,6 +20,7 @@ struct FacilityProfileView: View {
     @State private var displayState: String = ""
     @State private var displayAddress: String = ""
     @State private var displayDescription: String = ""
+    @State private var showFacilityDetails = false
 
     var body: some View {
         NavigationView {
@@ -117,7 +118,7 @@ struct FacilityProfileView: View {
                         ProfileActionButton(
                             icon: "building.2.fill",
                             title: "Facility Details",
-                            action: {}
+                            action: { showFacilityDetails = true }
                         )
                         ProfileActionButton(
                             icon: "bell.fill",
@@ -162,6 +163,9 @@ struct FacilityProfileView: View {
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear { loadFacilityData() }
+            .sheet(isPresented: $showFacilityDetails, onDismiss: loadFacilityData) {
+                FacilityDetailsView()
+            }
         }
     }
 
