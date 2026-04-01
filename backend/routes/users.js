@@ -1,7 +1,18 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const { authMiddleware } = require('../middleware/auth');
 const User = require('../models/User');
+
+const profileRateLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' }
+});
+
+router.use(profileRateLimit);
 
 /**
  * @route   GET /api/users/profile
@@ -72,10 +83,10 @@ router.patch('/profile', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (firstName) user.firstName = firstName;
-    if (lastName) user.lastName = lastName;
+    if (firstName !== undefined) user.firstName = firstName;
+    if (lastName !== undefined) user.lastName = lastName;
     if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
-    if (profession) user.profession = profession;
+    if (profession !== undefined) user.profession = profession;
     if (licenseNumber !== undefined) user.licenseNumber = licenseNumber;
     if (address !== undefined) user.address = address;
     if (credentials !== undefined) user.credentials = credentials;
