@@ -251,6 +251,7 @@ struct HealthcareWorkerSignUpView: View {
                 
                 // Store auth token and user data securely
                 UserDefaults.standard.set(response.token, forKey: "authToken")
+                UserDefaults.standard.set(response.user.id, forKey: "userId")
                 UserDefaults.standard.set(response.user.email, forKey: "userEmail")
                 UserDefaults.standard.set(response.user.firstName, forKey: "userFirstName")
                 UserDefaults.standard.set(response.user.profession ?? profession, forKey: "userProfession")

@@ -52,6 +52,8 @@ struct EditProfileView: View {
     @State private var boardCertifications: [BoardCertification]
 
     @State private var showingSavedAlert = false
+    @State private var isSaving = false
+    @State private var saveError: String? = nil
 
     let allCredentials = ["MD", "DO", "PA", "APRN", "RN", "CRNA", "DPT", "PTA"]
 
@@ -212,12 +214,19 @@ struct EditProfileView: View {
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveProfile()
-                        showingSavedAlert = true
+                    Button(action: {
+                        Task { await saveProfile() }
+                    }) {
+                        if isSaving {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        } else {
+                            Text("Save")
+                                .font(.system(size: 16, weight: .semibold))
+                        }
                     }
-                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Color(hex: "667eea"))
+                    .disabled(isSaving)
                 }
             }
             .alert("Profile Saved", isPresented: $showingSavedAlert) {
@@ -225,32 +234,65 @@ struct EditProfileView: View {
             } message: {
                 Text("Your profile has been updated successfully.")
             }
+            .alert("Save Failed", isPresented: Binding(
+                get: { saveError != nil },
+                set: { if !$0 { saveError = nil } }
+            )) {
+                Button("OK") {}
+            } message: {
+                Text(saveError ?? "An unknown error occurred.")
+            }
         }
     }
 
     // MARK: - Save Profile
-    private func saveProfile() {
-        UserDefaults.standard.set(firstName, forKey: "profileFirstName")
-        UserDefaults.standard.set(lastName, forKey: "profileLastName")
-        UserDefaults.standard.set(email, forKey: "profileEmail")
-        UserDefaults.standard.set(phone, forKey: "profilePhone")
-        UserDefaults.standard.set(address, forKey: "profileAddress")
-        UserDefaults.standard.set(Array(selectedCredentials), forKey: "profileCredentials")
+    private func saveProfile() async {
+        isSaving = true
+        defer { isSaving = false }
 
-        if let encoded = try? JSONEncoder().encode(stateLicenses) {
-            UserDefaults.standard.set(encoded, forKey: "profileStateLicenses")
-        }
-        if let encoded = try? JSONEncoder().encode(boardCertifications) {
-            UserDefaults.standard.set(encoded, forKey: "profileBoardCertifications")
-        }
+        let token = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        let licenseItems = stateLicenses.map { StateLicenseItem(state: $0.state, licenseNumber: $0.licenseNumber) }
+        let certItems = boardCertifications.map { BoardCertificationItem(name: $0.name) }
+        let credArray = Array(selectedCredentials)
 
-        // Keep userFirstName and userEmail in sync so the dashboard reflects the change
-        if !firstName.isEmpty {
-            UserDefaults.standard.set(firstName, forKey: "userFirstName")
+        do {
+            let updatedUser = try await APIService.shared.updateWorkerProfile(
+                token: token,
+                firstName: firstName,
+                lastName: lastName,
+                phoneNumber: phone.isEmpty ? nil : phone,
+                address: address.isEmpty ? nil : address,
+                credentials: credArray.isEmpty ? nil : credArray,
+                stateLicenses: licenseItems.isEmpty ? nil : licenseItems,
+                boardCertifications: certItems.isEmpty ? nil : certItems
+            )
+            persistLocally(user: updatedUser)
+            showingSavedAlert = true
+        } catch let error as APIError {
+            saveError = error.localizedDescription
+        } catch {
+            saveError = "Network error. Please check your connection."
         }
-        if !email.isEmpty {
-            UserDefaults.standard.set(email, forKey: "userEmail")
+    }
+
+    private func persistLocally(user: User) {
+        let defaults = UserDefaults.standard
+        defaults.set(user.firstName, forKey: "profileFirstName")
+        defaults.set(user.lastName, forKey: "profileLastName")
+        defaults.set(user.email, forKey: "profileEmail")
+        if let phone = user.phoneNumber { defaults.set(phone, forKey: "profilePhone") }
+        if let addr = user.address { defaults.set(addr, forKey: "profileAddress") }
+        if let creds = user.credentials { defaults.set(creds, forKey: "profileCredentials") }
+        if let licenses = user.stateLicenses,
+           let encoded = try? JSONEncoder().encode(licenses.map { StateLicense(state: $0.state, licenseNumber: $0.licenseNumber) }) {
+            defaults.set(encoded, forKey: "profileStateLicenses")
         }
+        if let certs = user.boardCertifications,
+           let encoded = try? JSONEncoder().encode(certs.map { BoardCertification(name: $0.name) }) {
+            defaults.set(encoded, forKey: "profileBoardCertifications")
+        }
+        defaults.set(user.firstName, forKey: "userFirstName")
+        defaults.set(user.email, forKey: "userEmail")
     }
 }
 

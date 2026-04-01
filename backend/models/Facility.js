@@ -77,6 +77,10 @@ const Facility = sequelize.define('Facility', {
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  profilePhotoUrl: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, {
   tableName: 'facilities',

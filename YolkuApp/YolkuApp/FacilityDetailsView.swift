@@ -22,15 +22,19 @@ struct FacilityDetailsView: View {
     @State private var address: String
     @State private var city: String
     @State private var state: String
+    @State private var zipCode: String
     @State private var phone: String
     @State private var about: String
     @State private var showSavedAlert = false
+    @State private var isSaving = false
+    @State private var saveError: String? = nil
 
     init() {
         _selectedFacilityType = State(initialValue: UserDefaults.standard.string(forKey: "facilityType") ?? "")
         _address = State(initialValue: UserDefaults.standard.string(forKey: "facilityAddress") ?? "")
         _city = State(initialValue: UserDefaults.standard.string(forKey: "facilityCity") ?? "")
         _state = State(initialValue: UserDefaults.standard.string(forKey: "facilityState") ?? "")
+        _zipCode = State(initialValue: UserDefaults.standard.string(forKey: "facilityZipCode") ?? "")
         _phone = State(initialValue: UserDefaults.standard.string(forKey: "facilityPhone") ?? "")
         _about = State(initialValue: UserDefaults.standard.string(forKey: "facilityDescription") ?? "")
     }
@@ -97,6 +101,17 @@ struct FacilityDetailsView: View {
                                         .stroke(Color(hex: "e0e0e0"), lineWidth: 2)
                                 )
                                 .cornerRadius(8)
+
+                            TextField("ZIP", text: $zipCode)
+                                .keyboardType(.numbersAndPunctuation)
+                                .padding()
+                                .frame(width: 90)
+                                .background(Color.white)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color(hex: "e0e0e0"), lineWidth: 2)
+                                )
+                                .cornerRadius(8)
                         }
                     }
 
@@ -144,21 +159,27 @@ struct FacilityDetailsView: View {
                     }
 
                     // MARK: – Save button
-                    Button(action: saveDetails) {
-                        Text("Save Details")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(
-                                LinearGradient(
-                                    colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(12)
+                    Button(action: { Task { await saveDetails() } }) {
+                        if isSaving {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text("Save Details")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
+                    .disabled(isSaving)
                     .padding(.top, 8)
 
                     Spacer(minLength: 40)
@@ -180,17 +201,50 @@ struct FacilityDetailsView: View {
             } message: {
                 Text("Your facility details have been updated.")
             }
+            .alert("Save Failed", isPresented: Binding(
+                get: { saveError != nil },
+                set: { if !$0 { saveError = nil } }
+            )) {
+                Button("OK") {}
+            } message: {
+                Text(saveError ?? "An unknown error occurred.")
+            }
         }
     }
 
-    private func saveDetails() {
-        UserDefaults.standard.set(selectedFacilityType, forKey: "facilityType")
-        UserDefaults.standard.set(address, forKey: "facilityAddress")
-        UserDefaults.standard.set(city, forKey: "facilityCity")
-        UserDefaults.standard.set(state, forKey: "facilityState")
-        UserDefaults.standard.set(phone, forKey: "facilityPhone")
-        UserDefaults.standard.set(about, forKey: "facilityDescription")
-        showSavedAlert = true
+    private func saveDetails() async {
+        isSaving = true
+        defer { isSaving = false }
+
+        let token = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        let facilityName = UserDefaults.standard.string(forKey: "facilityName")
+
+        do {
+            let updated = try await APIService.shared.updateFacilityProfile(
+                token: token,
+                name: facilityName,
+                address: address.isEmpty ? nil : address,
+                city: city.isEmpty ? nil : city,
+                state: state.isEmpty ? nil : state,
+                zipCode: zipCode.isEmpty ? nil : zipCode,
+                phoneNumber: phone.isEmpty ? nil : phone,
+                facilityType: selectedFacilityType.isEmpty ? nil : selectedFacilityType,
+                description: about.isEmpty ? nil : about
+            )
+            let defaults = UserDefaults.standard
+            defaults.set(updated.facilityType, forKey: "facilityType")
+            defaults.set(updated.address, forKey: "facilityAddress")
+            defaults.set(updated.city, forKey: "facilityCity")
+            defaults.set(updated.state, forKey: "facilityState")
+            defaults.set(updated.zipCode, forKey: "facilityZipCode")
+            if let phone = updated.phoneNumber { defaults.set(phone, forKey: "facilityPhone") }
+            if let desc = updated.description { defaults.set(desc, forKey: "facilityDescription") }
+            showSavedAlert = true
+        } catch let error as APIError {
+            saveError = error.localizedDescription
+        } catch {
+            saveError = "Network error. Please check your connection."
+        }
     }
 }
 

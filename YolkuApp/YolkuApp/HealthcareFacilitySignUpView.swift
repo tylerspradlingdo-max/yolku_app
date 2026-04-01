@@ -258,6 +258,7 @@ struct HealthcareFacilitySignUpView: View {
                 UserDefaults.standard.set(response.facility.city, forKey: "facilityCity")
                 UserDefaults.standard.set(response.facility.state, forKey: "facilityState")
                 UserDefaults.standard.set(response.facility.address, forKey: "facilityAddress")
+                UserDefaults.standard.set(response.facility.zipCode, forKey: "facilityZipCode")
                 if let phone = response.facility.phoneNumber {
                     UserDefaults.standard.set(phone, forKey: "facilityPhone")
                 }

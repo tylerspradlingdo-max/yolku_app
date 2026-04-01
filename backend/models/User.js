@@ -66,6 +66,29 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true
   },
+  address: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  credentials: {
+    type: DataTypes.ARRAY(DataTypes.STRING),
+    allowNull: true,
+    defaultValue: []
+  },
+  stateLicenses: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
+  boardCertifications: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
+  profilePhotoUrl: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   isVerified: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
