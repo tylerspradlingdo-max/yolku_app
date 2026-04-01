@@ -238,6 +238,7 @@ struct SignInView: View {
                     UserDefaults.standard.set(response.facility.city, forKey: "facilityCity")
                     UserDefaults.standard.set(response.facility.state, forKey: "facilityState")
                     UserDefaults.standard.set(response.facility.address, forKey: "facilityAddress")
+                    UserDefaults.standard.set(response.facility.zipCode, forKey: "facilityZipCode")
                     if let phone = response.facility.phoneNumber {
                         UserDefaults.standard.set(phone, forKey: "facilityPhone")
                     }
@@ -277,6 +278,7 @@ struct SignInView: View {
                     
                     // Store auth token and user data securely
                     UserDefaults.standard.set(response.token, forKey: "authToken")
+                    UserDefaults.standard.set(response.user.id, forKey: "userId")
                     UserDefaults.standard.set(response.user.email, forKey: "userEmail")
                     UserDefaults.standard.set(response.user.firstName, forKey: "userFirstName")
                     UserDefaults.standard.set(response.user.profession ?? "Healthcare Professional", forKey: "userProfession")

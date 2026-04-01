@@ -34,6 +34,10 @@ class APIService {
                     phoneNumber: "555-0123",
                     profession: "RN",
                     licenseNumber: "RN123456",
+                    address: nil,
+                    credentials: nil,
+                    stateLicenses: nil,
+                    boardCertifications: nil,
                     isVerified: true,
                     isActive: true,
                     lastLogin: ISO8601DateFormatter().string(from: Date()),
@@ -97,6 +101,10 @@ class APIService {
                     phoneNumber: phoneNumber,
                     profession: profession,
                     licenseNumber: licenseNumber,
+                    address: nil,
+                    credentials: nil,
+                    stateLicenses: nil,
+                    boardCertifications: nil,
                     isVerified: false,
                     isActive: true,
                     lastLogin: nil,
@@ -158,6 +166,10 @@ class APIService {
                 phoneNumber: "555-0123",
                 profession: "RN",
                 licenseNumber: "RN123456",
+                address: nil,
+                credentials: nil,
+                stateLicenses: nil,
+                boardCertifications: nil,
                 isVerified: true,
                 isActive: true,
                 lastLogin: ISO8601DateFormatter().string(from: Date()),
@@ -186,6 +198,173 @@ class APIService {
         
         let profileResponse = try JSONDecoder().decode(ProfileResponse.self, from: data)
         return profileResponse.user
+    }
+
+    func updateWorkerProfile(
+        token: String,
+        firstName: String,
+        lastName: String,
+        phoneNumber: String?,
+        address: String?,
+        credentials: [String]?,
+        stateLicenses: [StateLicenseItem]?,
+        boardCertifications: [BoardCertificationItem]?
+    ) async throws -> User {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 800_000_000)
+            let now = ISO8601DateFormatter().string(from: Date())
+            return User(
+                id: UserDefaults.standard.string(forKey: "userId") ?? UUID().uuidString,
+                firstName: firstName,
+                lastName: lastName,
+                email: UserDefaults.standard.string(forKey: "userEmail") ?? "",
+                phoneNumber: phoneNumber,
+                profession: UserDefaults.standard.string(forKey: "userProfession") ?? "RN",
+                licenseNumber: nil,
+                address: address,
+                credentials: credentials,
+                stateLicenses: stateLicenses,
+                boardCertifications: boardCertifications,
+                isVerified: false,
+                isActive: true,
+                lastLogin: nil,
+                createdAt: now,
+                updatedAt: now
+            )
+        }
+
+        guard let url = URL(string: APIConfig.Users.profile) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let body = UpdateWorkerProfileRequest(
+            firstName: firstName,
+            lastName: lastName,
+            phoneNumber: phoneNumber,
+            address: address,
+            credentials: credentials,
+            stateLicenses: stateLicenses,
+            boardCertifications: boardCertifications
+        )
+        request.httpBody = try JSONEncoder().encode(body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.error)
+            }
+            throw APIError.serverError("Failed to update profile")
+        }
+        let profileResponse = try JSONDecoder().decode(ProfileResponse.self, from: data)
+        return profileResponse.user
+    }
+
+    func fetchFacilityProfile(token: String) async throws -> FacilityData {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 500_000_000)
+            let now = ISO8601DateFormatter().string(from: Date())
+            return FacilityData(
+                id: UserDefaults.standard.string(forKey: "facilityId") ?? UUID().uuidString,
+                name: UserDefaults.standard.string(forKey: "facilityName") ?? "Demo Medical Center",
+                email: UserDefaults.standard.string(forKey: "facilityEmail") ?? "",
+                address: UserDefaults.standard.string(forKey: "facilityAddress") ?? "123 Main St",
+                city: UserDefaults.standard.string(forKey: "facilityCity") ?? "San Francisco",
+                state: UserDefaults.standard.string(forKey: "facilityState") ?? "CA",
+                zipCode: UserDefaults.standard.string(forKey: "facilityZipCode") ?? "94102",
+                phoneNumber: UserDefaults.standard.string(forKey: "facilityPhone"),
+                facilityType: UserDefaults.standard.string(forKey: "facilityType") ?? "Hospital",
+                description: UserDefaults.standard.string(forKey: "facilityDescription"),
+                isActive: true,
+                createdAt: now,
+                updatedAt: now
+            )
+        }
+
+        guard let url = URL(string: APIConfig.Facilities.profile) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.invalidResponse
+        }
+        let profileResponse = try JSONDecoder().decode(FacilityProfileResponse.self, from: data)
+        return profileResponse.data
+    }
+
+    func updateFacilityProfile(
+        token: String,
+        name: String?,
+        address: String?,
+        city: String?,
+        state: String?,
+        zipCode: String?,
+        phoneNumber: String?,
+        facilityType: String?,
+        description: String?
+    ) async throws -> FacilityData {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 800_000_000)
+            let now = ISO8601DateFormatter().string(from: Date())
+            return FacilityData(
+                id: UserDefaults.standard.string(forKey: "facilityId") ?? UUID().uuidString,
+                name: name ?? UserDefaults.standard.string(forKey: "facilityName") ?? "",
+                email: UserDefaults.standard.string(forKey: "facilityEmail") ?? "",
+                address: address ?? UserDefaults.standard.string(forKey: "facilityAddress") ?? "",
+                city: city ?? UserDefaults.standard.string(forKey: "facilityCity") ?? "",
+                state: state ?? UserDefaults.standard.string(forKey: "facilityState") ?? "",
+                zipCode: zipCode ?? UserDefaults.standard.string(forKey: "facilityZipCode") ?? "",
+                phoneNumber: phoneNumber,
+                facilityType: facilityType ?? UserDefaults.standard.string(forKey: "facilityType") ?? "Hospital",
+                description: description,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now
+            )
+        }
+
+        guard let url = URL(string: APIConfig.Facilities.profile) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let body = UpdateFacilityProfileRequest(
+            name: name,
+            address: address,
+            city: city,
+            state: state,
+            zipCode: zipCode,
+            phoneNumber: phoneNumber,
+            facilityType: facilityType,
+            description: description
+        )
+        request.httpBody = try JSONEncoder().encode(body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.error)
+            }
+            throw APIError.serverError("Failed to update facility profile")
+        }
+        let profileResponse = try JSONDecoder().decode(FacilityProfileResponse.self, from: data)
+        return profileResponse.data
     }
     
     func facilitySignIn(email: String, password: String) async throws -> FacilityAuthResponse {
@@ -1028,6 +1207,27 @@ struct CreatePositionRequest: Codable {
     let openings: Int
 }
 
+struct UpdateWorkerProfileRequest: Codable {
+    let firstName: String
+    let lastName: String
+    let phoneNumber: String?
+    let address: String?
+    let credentials: [String]?
+    let stateLicenses: [StateLicenseItem]?
+    let boardCertifications: [BoardCertificationItem]?
+}
+
+struct UpdateFacilityProfileRequest: Codable {
+    let name: String?
+    let address: String?
+    let city: String?
+    let state: String?
+    let zipCode: String?
+    let phoneNumber: String?
+    let facilityType: String?
+    let description: String?
+}
+
 // MARK: - Response Models
 
 struct AuthResponse: Codable {
@@ -1040,6 +1240,11 @@ struct ProfileResponse: Codable {
     let user: User
 }
 
+struct FacilityProfileResponse: Codable {
+    let success: Bool
+    let data: FacilityData
+}
+
 struct User: Codable {
     let id: String
     let firstName: String
@@ -1048,11 +1253,25 @@ struct User: Codable {
     let phoneNumber: String?
     let profession: String
     let licenseNumber: String?
+    let address: String?
+    let credentials: [String]?
+    let stateLicenses: [StateLicenseItem]?
+    let boardCertifications: [BoardCertificationItem]?
     let isVerified: Bool
     let isActive: Bool
     let lastLogin: String?
     let createdAt: String
     let updatedAt: String
+}
+
+// Lightweight API types for worker profile arrays (no local UUID)
+struct StateLicenseItem: Codable {
+    let state: String
+    let licenseNumber: String
+}
+
+struct BoardCertificationItem: Codable {
+    let name: String
 }
 
 struct ErrorResponse: Codable {

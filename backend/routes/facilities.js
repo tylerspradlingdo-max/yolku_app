@@ -4,6 +4,17 @@ const { Facility, Position } = require('../models');
 const { Op } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
+const rateLimit = require('express-rate-limit');
+
+const facilityRateLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many requests, please try again later.' }
+});
+
+router.use(facilityRateLimit);
 
 /**
  * Middleware to verify facility JWT token
@@ -232,11 +243,8 @@ router.get('/profile', authMiddleware, async (req, res) => {
   }
 });
 
-/**
- * PUT /api/facilities/profile
- * Update facility profile
- */
-router.put('/profile', authMiddleware, [
+// Shared validators for facility profile updates
+const facilityProfileValidators = [
   body('name').optional().trim().isLength({ min: 2, max: 200 }),
   body('address').optional().trim().notEmpty(),
   body('city').optional().trim().notEmpty(),
@@ -245,18 +253,23 @@ router.put('/profile', authMiddleware, [
   body('phoneNumber').optional().trim(),
   body('facilityType').optional().isIn(['Hospital', 'Clinic', 'Nursing Home', 'Assisted Living', 'Home Health', 'Urgent Care', 'Rehabilitation Center', 'Other']),
   body('description').optional().trim()
-], async (req, res) => {
+];
+
+/**
+ * Shared handler for PUT and PATCH /api/facilities/profile
+ */
+async function updateFacilityProfileHandler(req, res) {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        errors: errors.array() 
+        errors: errors.array()
       });
     }
 
     const facility = await Facility.findByPk(req.facilityId);
-    
+
     if (!facility) {
       return res.status(404).json({
         success: false,
@@ -264,10 +277,9 @@ router.put('/profile', authMiddleware, [
       });
     }
 
-    // Update allowed fields
     const { name, address, city, state, zipCode, phoneNumber, facilityType, description } = req.body;
     const updates = {};
-    
+
     if (name) updates.name = name;
     if (address) updates.address = address;
     if (city) updates.city = city;
@@ -294,7 +306,19 @@ router.put('/profile', authMiddleware, [
       }
     });
   }
-});
+}
+
+/**
+ * PUT /api/facilities/profile
+ * Update facility profile
+ */
+router.put('/profile', authMiddleware, facilityProfileValidators, updateFacilityProfileHandler);
+
+/**
+ * PATCH /api/facilities/profile
+ * Update facility profile
+ */
+router.patch('/profile', authMiddleware, facilityProfileValidators, updateFacilityProfileHandler);
 
 /**
  * GET /api/facilities/positions

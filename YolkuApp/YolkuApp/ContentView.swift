@@ -17,8 +17,10 @@ struct ContentView: View {
         if isLoggedIn {
             if userType == "facility" {
                 FacilityDashboardView()
+                    .task { await syncFacilityProfile() }
             } else {
                 DashboardView()
+                    .task { await syncWorkerProfile() }
             }
         } else {
             NavigationView {
@@ -54,6 +56,48 @@ struct ContentView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Profile Sync
+
+    private func syncWorkerProfile() async {
+        guard let token = UserDefaults.standard.string(forKey: "authToken"), !token.isEmpty else { return }
+        guard let user = try? await APIService.shared.getProfile(token: token) else { return }
+        let defaults = UserDefaults.standard
+        defaults.set(user.id, forKey: "userId")
+        defaults.set(user.firstName, forKey: "userFirstName")
+        defaults.set(user.email, forKey: "userEmail")
+        defaults.set(user.profession, forKey: "userProfession")
+        defaults.set(user.firstName, forKey: "profileFirstName")
+        defaults.set(user.lastName, forKey: "profileLastName")
+        defaults.set(user.email, forKey: "profileEmail")
+        if let phone = user.phoneNumber { defaults.set(phone, forKey: "profilePhone") }
+        if let address = user.address { defaults.set(address, forKey: "profileAddress") }
+        if let creds = user.credentials { defaults.set(creds, forKey: "profileCredentials") }
+        if let licenses = user.stateLicenses,
+           let encoded = try? JSONEncoder().encode(licenses.map { StateLicense(state: $0.state, licenseNumber: $0.licenseNumber) }) {
+            defaults.set(encoded, forKey: "profileStateLicenses")
+        }
+        if let certs = user.boardCertifications,
+           let encoded = try? JSONEncoder().encode(certs.map { BoardCertification(name: $0.name) }) {
+            defaults.set(encoded, forKey: "profileBoardCertifications")
+        }
+    }
+
+    private func syncFacilityProfile() async {
+        guard let token = UserDefaults.standard.string(forKey: "authToken"), !token.isEmpty else { return }
+        guard let facility = try? await APIService.shared.fetchFacilityProfile(token: token) else { return }
+        let defaults = UserDefaults.standard
+        defaults.set(facility.id, forKey: "facilityId")
+        defaults.set(facility.name, forKey: "facilityName")
+        defaults.set(facility.email, forKey: "facilityEmail")
+        defaults.set(facility.facilityType, forKey: "facilityType")
+        defaults.set(facility.city, forKey: "facilityCity")
+        defaults.set(facility.state, forKey: "facilityState")
+        defaults.set(facility.address, forKey: "facilityAddress")
+        defaults.set(facility.zipCode, forKey: "facilityZipCode")
+        if let phone = facility.phoneNumber { defaults.set(phone, forKey: "facilityPhone") }
+        if let desc = facility.description { defaults.set(desc, forKey: "facilityDescription") }
     }
 }
 
