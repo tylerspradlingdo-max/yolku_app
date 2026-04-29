@@ -3,7 +3,20 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
+
+// 1 hour in milliseconds, used for password reset token expiry
+const RESET_TOKEN_EXPIRY_MS = 60 * 60 * 1000;
+
+// Rate limiter for password-reset routes (prevent token enumeration/brute-force)
+const resetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -171,6 +184,7 @@ router.post('/verify', async (req, res) => {
  * @access  Public
  */
 router.post('/forgot-password',
+  resetLimiter,
   [body('email').isEmail().normalizeEmail().withMessage('Valid email is required')],
   async (req, res) => {
     try {
@@ -192,7 +206,7 @@ router.post('/forgot-password',
       const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
 
       user.resetPasswordToken = resetTokenHash;
-      user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      user.resetPasswordExpires = new Date(Date.now() + RESET_TOKEN_EXPIRY_MS);
       await user.save();
 
       // In production, send the resetToken via email using your email provider.
@@ -216,6 +230,7 @@ router.post('/forgot-password',
  * @access  Public
  */
 router.post('/reset-password',
+  resetLimiter,
   [
     body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
     body('token').notEmpty().withMessage('Reset token is required'),

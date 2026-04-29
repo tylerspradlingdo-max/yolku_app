@@ -141,7 +141,8 @@ struct ForgotPasswordView: View {
 
     private func handleSubmit() {
         guard !email.isEmpty else { return }
-        guard email.contains("@") && email.contains(".") else {
+        let emailRegex = #"^[A-Z0-9a-z._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$"#
+        guard email.range(of: emailRegex, options: .regularExpression) != nil else {
             alertMessage = "Please enter a valid email address."
             showAlert = true
             return

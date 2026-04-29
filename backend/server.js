@@ -82,10 +82,10 @@ app.listen(PORT, async () => {
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API Base URL: http://localhost:${PORT}`);
 
-  // Auto-sync database schema (safe: only adds new tables/columns, never drops)
+  // Auto-sync database schema (safe: only creates missing tables/columns, never drops)
   try {
     const sequelize = require('./config/database');
-    await sequelize.sync({ alter: false });
+    await sequelize.sync();
     console.log('✅ Database schema synced');
   } catch (err) {
     console.error('⚠️  Database sync warning:', err.message);
