@@ -77,10 +77,19 @@ app.use((req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Yolku API Server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API Base URL: http://localhost:${PORT}`);
+
+  // Auto-sync database schema (safe: only adds new tables/columns, never drops)
+  try {
+    const sequelize = require('./config/database');
+    await sequelize.sync({ alter: false });
+    console.log('✅ Database schema synced');
+  } catch (err) {
+    console.error('⚠️  Database sync warning:', err.message);
+  }
 });
 
 module.exports = app;

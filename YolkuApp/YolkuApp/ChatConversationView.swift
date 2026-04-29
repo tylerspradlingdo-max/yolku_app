@@ -10,7 +10,6 @@ import SwiftUI
 struct ChatConversationView: View {
     let conversation: ChatConversation
     
-    @AppStorage("authToken") private var authToken = ""
     @State private var messages: [ChatMessage] = []
     @State private var messageText = ""
     @State private var isLoading = false
@@ -140,6 +139,7 @@ struct ChatConversationView: View {
     private func loadMessages() async {
         isLoading = true
         defer { isLoading = false }
+        let authToken = KeychainService.load(key: "authToken") ?? ""
         do {
             let detail = try await APIService.shared.getMessages(
                 conversationId: conversation.id,
@@ -171,6 +171,7 @@ struct ChatConversationView: View {
         Task {
             isSending = true
             defer { isSending = false }
+            let authToken = KeychainService.load(key: "authToken") ?? ""
             do {
                 let sent = try await APIService.shared.sendMessage(
                     conversationId: conversation.id,

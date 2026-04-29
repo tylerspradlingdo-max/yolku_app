@@ -249,12 +249,13 @@ struct HealthcareWorkerSignUpView: View {
                     licenseNumber: license.isEmpty ? nil : license
                 )
                 
-                // Store auth token and user data securely
-                UserDefaults.standard.set(response.token, forKey: "authToken")
+                // Store auth token securely in Keychain; non-sensitive data in UserDefaults
                 UserDefaults.standard.set(response.user.id, forKey: "userId")
                 UserDefaults.standard.set(response.user.email, forKey: "userEmail")
                 UserDefaults.standard.set(response.user.firstName, forKey: "userFirstName")
                 UserDefaults.standard.set(response.user.profession ?? profession, forKey: "userProfession")
+                UserDefaults.standard.set("worker", forKey: "userType")
+                KeychainService.save(key: "authToken", value: response.token)
                 
                 await MainActor.run {
                     isLoading = false

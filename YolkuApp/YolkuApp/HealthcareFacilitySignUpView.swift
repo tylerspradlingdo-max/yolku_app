@@ -249,8 +249,8 @@ struct HealthcareFacilitySignUpView: View {
                     description: description.isEmpty ? nil : description
                 )
                 
-                // Store auth token and facility data securely
-                UserDefaults.standard.set(response.token, forKey: "authToken")
+                // Store auth token securely in Keychain; non-sensitive data in UserDefaults
+                KeychainService.save(key: "authToken", value: response.token)
                 UserDefaults.standard.set(response.facility.id, forKey: "facilityId")
                 UserDefaults.standard.set(response.facility.email, forKey: "facilityEmail")
                 UserDefaults.standard.set(response.facility.name, forKey: "facilityName")

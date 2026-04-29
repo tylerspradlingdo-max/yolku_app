@@ -10,7 +10,6 @@ import SwiftUI
 
 struct AIJobMatcherView: View {
     @AppStorage("userProfession") private var userProfession = ""
-    @AppStorage("authToken") private var authToken = ""
 
     @State private var profession: String = ""
     @State private var preferredState: String = ""

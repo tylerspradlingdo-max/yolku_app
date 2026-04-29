@@ -250,7 +250,7 @@ struct EditProfileView: View {
         isSaving = true
         defer { isSaving = false }
 
-        let token = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        let token = KeychainService.load(key: "authToken") ?? ""
         let licenseItems = stateLicenses.map { StateLicenseItem(state: $0.state, licenseNumber: $0.licenseNumber) }
         let certItems = boardCertifications.map { BoardCertificationItem(name: $0.name) }
         let credArray = Array(selectedCredentials)

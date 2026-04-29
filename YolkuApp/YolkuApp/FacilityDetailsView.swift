@@ -12,9 +12,12 @@ struct FacilityDetailsView: View {
 
     let facilityTypes = [
         "Hospital",
-        "Outpatient Clinic",
-        "Surgery Center",
+        "Clinic",
         "Nursing Home",
+        "Assisted Living",
+        "Home Health",
+        "Urgent Care",
+        "Rehabilitation Center",
         "Other"
     ]
 
@@ -216,7 +219,7 @@ struct FacilityDetailsView: View {
         isSaving = true
         defer { isSaving = false }
 
-        let token = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        let token = KeychainService.load(key: "authToken") ?? ""
         let facilityName = UserDefaults.standard.string(forKey: "facilityName")
 
         do {

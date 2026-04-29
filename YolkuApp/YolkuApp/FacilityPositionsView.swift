@@ -149,7 +149,7 @@ struct FacilityPositionsView: View {
     private func loadPositions() {
         isLoading = true
         errorMessage = nil
-        let token = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        let token = KeychainService.load(key: "authToken") ?? ""
         Task {
             do {
                 let result = try await APIService.shared.getFacilityPositions(token: token)
@@ -167,7 +167,7 @@ struct FacilityPositionsView: View {
     }
 
     private func deletePosition(_ position: FacilityPosition) {
-        let token = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        let token = KeychainService.load(key: "authToken") ?? ""
         Task {
             do {
                 try await APIService.shared.deleteFacilityPosition(token: token, positionId: position.id)

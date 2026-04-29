@@ -283,7 +283,7 @@ struct CreatePositionView: View {
 
     private func submitPosition() {
         isLoading = true
-        let token = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        let token = KeychainService.load(key: "authToken") ?? ""
         let startDateStr = isoFormatter.string(from: startDate)
         let endDateStr = hasEndDate ? isoFormatter.string(from: endDate) : nil
         let salaryValue = Double(salary) ?? 0

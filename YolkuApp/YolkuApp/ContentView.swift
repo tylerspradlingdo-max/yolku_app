@@ -14,54 +14,82 @@ struct ContentView: View {
     @State private var showSignIn = false
     
     var body: some View {
-        if isLoggedIn {
-            if userType == "facility" {
-                FacilityDashboardView()
-                    .task { await syncFacilityProfile() }
+        Group {
+            if isLoggedIn {
+                if userType == "facility" {
+                    FacilityDashboardView()
+                        .task { await syncFacilityProfile() }
+                } else {
+                    DashboardView()
+                        .task { await syncWorkerProfile() }
+                }
             } else {
-                DashboardView()
-                    .task { await syncWorkerProfile() }
-            }
-        } else {
-            NavigationView {
-                ScrollView {
-                    VStack(spacing: 0) {
-                        HeroView()
-                        FeaturesView()
-                        AppPreviewView()
-                        DownloadView()
-                        FooterView()
-                    }
-                }
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        // LOGO: Using image logo from Assets.xcassets
-                        Image("AppLogo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 30)
-                            .accessibilityLabel("Yolku logo")
-                    }
-                    
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Sign In") {
-                            showSignIn = true
+                NavigationView {
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            HeroView()
+                            FeaturesView()
+                            AppPreviewView()
+                            DownloadView()
+                            FooterView()
                         }
-                        .buttonStyle(OutlineButtonStyle())
                     }
-                }
-                .sheet(isPresented: $showSignIn) {
-                    SignInView()
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            // LOGO: Using image logo from Assets.xcassets
+                            Image("AppLogo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 30)
+                                .accessibilityLabel("Yolku logo")
+                        }
+                        
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Sign In") {
+                                showSignIn = true
+                            }
+                            .buttonStyle(OutlineButtonStyle())
+                        }
+                    }
+                    .sheet(isPresented: $showSignIn) {
+                        SignInView()
+                    }
                 }
             }
         }
+        // Automatically log out when the server returns 401 (expired/invalid token)
+        .onReceive(NotificationCenter.default.publisher(for: .didReceiveUnauthorizedResponse)) { _ in
+            performLogout()
+        }
+    }
+
+    // MARK: - Logout
+
+    private func performLogout() {
+        KeychainService.delete(key: "authToken")
+        clearAllProfileDefaults()
+        isLoggedIn = false
+        userType = ""
+    }
+
+    private func clearAllProfileDefaults() {
+        let keys = [
+            "userId", "userEmail", "userFirstName", "userProfession", "userType",
+            "profileFirstName", "profileLastName", "profileEmail", "profilePhone",
+            "profileAddress", "profileCredentials", "profileStateLicenses",
+            "profileBoardCertifications", "profileImage",
+            "facilityId", "facilityName", "facilityEmail", "facilityPhone",
+            "facilityType", "facilityCity", "facilityState", "facilityAddress",
+            "facilityZipCode", "facilityDescription"
+        ]
+        keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
     }
 
     // MARK: - Profile Sync
 
     private func syncWorkerProfile() async {
-        guard let token = UserDefaults.standard.string(forKey: "authToken"), !token.isEmpty else { return }
+        guard let token = KeychainService.load(key: "authToken"), !token.isEmpty else { return }
         guard let user = try? await APIService.shared.getProfile(token: token) else { return }
         let defaults = UserDefaults.standard
         defaults.set(user.id, forKey: "userId")
@@ -85,7 +113,7 @@ struct ContentView: View {
     }
 
     private func syncFacilityProfile() async {
-        guard let token = UserDefaults.standard.string(forKey: "authToken"), !token.isEmpty else { return }
+        guard let token = KeychainService.load(key: "authToken"), !token.isEmpty else { return }
         guard let facility = try? await APIService.shared.fetchFacilityProfile(token: token) else { return }
         let defaults = UserDefaults.standard
         defaults.set(facility.id, forKey: "facilityId")

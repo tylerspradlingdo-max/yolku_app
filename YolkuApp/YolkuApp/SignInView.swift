@@ -19,6 +19,9 @@ struct SignInView: View {
     @State private var isLoading = false
     @State private var navigateToDashboard = false
     @State private var selectedUserType = 0 // 0 = Healthcare Worker, 1 = Facility
+    @State private var showWorkerSignUp = false
+    @State private var showFacilitySignUp = false
+    @State private var showForgotPassword = false
     
     var body: some View {
         NavigationView {
@@ -107,7 +110,7 @@ struct SignInView: View {
                                 HStack {
                                     Spacer()
                                     Button("Forgot password?") {
-                                        // Forgot password action
+                                        showForgotPassword = true
                                     }
                                     .font(.system(size: 14))
                                     .foregroundColor(Color(hex: "667eea"))
@@ -161,7 +164,11 @@ struct SignInView: View {
                                 Text("Don't have an account?")
                                     .foregroundColor(Color(hex: "666666"))
                                 Button("Sign Up") {
-                                    // Navigate to sign up
+                                    if selectedUserType == 1 {
+                                        showFacilitySignUp = true
+                                    } else {
+                                        showWorkerSignUp = true
+                                    }
                                 }
                                 .foregroundColor(Color(hex: "667eea"))
                                 .fontWeight(.semibold)
@@ -202,6 +209,15 @@ struct SignInView: View {
                     DashboardView()
                 }
             }
+            .sheet(isPresented: $showWorkerSignUp) {
+                HealthcareWorkerSignUpView()
+            }
+            .sheet(isPresented: $showFacilitySignUp) {
+                HealthcareFacilitySignUpView()
+            }
+            .sheet(isPresented: $showForgotPassword) {
+                ForgotPasswordView()
+            }
         }
     }
     
@@ -230,7 +246,7 @@ struct SignInView: View {
                         email: email,
                         password: password
                     )
-                    UserDefaults.standard.set(response.token, forKey: "authToken")
+                    KeychainService.save(key: "authToken", value: response.token)
                     UserDefaults.standard.set(response.facility.id, forKey: "facilityId")
                     UserDefaults.standard.set(response.facility.email, forKey: "facilityEmail")
                     UserDefaults.standard.set(response.facility.name, forKey: "facilityName")
@@ -276,8 +292,8 @@ struct SignInView: View {
                         password: password
                     )
                     
-                    // Store auth token and user data securely
-                    UserDefaults.standard.set(response.token, forKey: "authToken")
+                    // Store auth token securely in Keychain; non-sensitive data in UserDefaults
+                    KeychainService.save(key: "authToken", value: response.token)
                     UserDefaults.standard.set(response.user.id, forKey: "userId")
                     UserDefaults.standard.set(response.user.email, forKey: "userEmail")
                     UserDefaults.standard.set(response.user.firstName, forKey: "userFirstName")
