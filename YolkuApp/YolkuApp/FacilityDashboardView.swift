@@ -72,18 +72,16 @@ struct FacilityDashboardView: View {
     }
 
     private func performLogout() {
+        // Clear authentication state
+        KeychainService.delete(key: "authToken")
         isLoggedIn = false
         userType = ""
-        UserDefaults.standard.removeObject(forKey: "authToken")
-        UserDefaults.standard.removeObject(forKey: "facilityName")
-        UserDefaults.standard.removeObject(forKey: "facilityEmail")
-        UserDefaults.standard.removeObject(forKey: "facilityPhone")
-        UserDefaults.standard.removeObject(forKey: "facilityType")
-        UserDefaults.standard.removeObject(forKey: "facilityCity")
-        UserDefaults.standard.removeObject(forKey: "facilityState")
-        UserDefaults.standard.removeObject(forKey: "facilityAddress")
-        UserDefaults.standard.removeObject(forKey: "facilityDescription")
-        UserDefaults.standard.removeObject(forKey: "userType")
+        let facilityKeys = [
+            "facilityId", "facilityName", "facilityEmail", "facilityPhone",
+            "facilityType", "facilityCity", "facilityState", "facilityAddress",
+            "facilityDescription", "facilityZipCode", "userType"
+        ]
+        facilityKeys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
     }
 }
 

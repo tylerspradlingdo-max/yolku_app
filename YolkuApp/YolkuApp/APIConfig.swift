@@ -12,7 +12,7 @@ struct APIConfig {
     
     // Set to true to use mock data (no server required)
     // Set to false to connect to real API
-    static let useMockMode = true // ⬅️ Change this to false when you have server connection
+    static let useMockMode = false // ⬅️ Change this to true when testing without a server
     
     // MARK: - Base URL
     
@@ -37,6 +37,8 @@ struct APIConfig {
         static let signIn = "\(baseURL)\(apiPath)/auth/signin"
         static let signUp = "\(baseURL)\(apiPath)/auth/signup"
         static let verify = "\(baseURL)\(apiPath)/auth/verify"
+        static let forgotPassword = "\(baseURL)\(apiPath)/auth/forgot-password"
+        static let resetPassword = "\(baseURL)\(apiPath)/auth/reset-password"
     }
     
     struct Users {
@@ -68,6 +70,7 @@ struct APIConfig {
     }
     
     struct Facilities {
+        static let signUp = "\(baseURL)\(apiPath)/facilities/signup"
         static let signIn = "\(baseURL)\(apiPath)/facilities/signin"
         static let profile = "\(baseURL)\(apiPath)/facilities/profile"
         static let positions = "\(baseURL)\(apiPath)/facilities/positions"

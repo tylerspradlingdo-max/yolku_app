@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ChatView: View {
-    @AppStorage("authToken") private var authToken = ""
     @State private var conversations: [ChatConversation] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -65,6 +64,7 @@ struct ChatView: View {
     private func loadConversations() async {
         isLoading = true
         defer { isLoading = false }
+        let authToken = KeychainService.load(key: "authToken") ?? ""
         do {
             conversations = try await APIService.shared.getConversations(token: authToken)
         } catch {

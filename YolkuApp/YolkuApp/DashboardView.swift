@@ -82,12 +82,18 @@ struct DashboardView: View {
     
     private func performLogout() {
         // Clear authentication state
+        KeychainService.delete(key: "authToken")
         isLoggedIn = false
         userFirstName = ""
         userEmail = ""
         userProfession = ""
-        UserDefaults.standard.removeObject(forKey: "authToken")
-        UserDefaults.standard.removeObject(forKey: "userType")
+        let profileKeys = [
+            "userId", "userType", "userEmail", "userFirstName", "userProfession",
+            "profileFirstName", "profileLastName", "profileEmail", "profilePhone",
+            "profileAddress", "profileCredentials", "profileStateLicenses",
+            "profileBoardCertifications", "profileImage"
+        ]
+        profileKeys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
     }
 }
 

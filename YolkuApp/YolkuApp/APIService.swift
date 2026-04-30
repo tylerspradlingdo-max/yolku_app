@@ -13,7 +13,26 @@ class APIService {
     static let shared = APIService()
     
     private init() {}
-    
+
+    // MARK: - Authenticated Response Helper
+
+    /// Checks an HTTP response status. If 401, posts an unauthorised notification so that
+    /// ContentView can log the user out. For other non-2xx codes, throws `serverError`.
+    private func validateAuthenticatedResponse(_ httpResponse: HTTPURLResponse, data: Data) throws {
+        if httpResponse.statusCode == 401 {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .didReceiveUnauthorizedResponse, object: nil)
+            }
+            throw APIError.unauthorized
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.error)
+            }
+            throw APIError.serverError("Request failed with status \(httpResponse.statusCode)")
+        }
+    }
+
     // MARK: - Authentication
     
     func signIn(email: String, password: String) async throws -> AuthResponse {
@@ -150,7 +169,33 @@ class APIService {
         
         return try JSONDecoder().decode(AuthResponse.self, from: data)
     }
-    
+
+    func forgotPassword(email: String) async throws {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 800_000_000)
+            return
+        }
+
+        guard let url = URL(string: APIConfig.Auth.forgotPassword) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(["email": email])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.error)
+            }
+            throw APIError.serverError("Failed to send reset email")
+        }
+    }
+
     func getProfile(token: String) async throws -> User {
         // Mock mode - return fake user profile
         if APIConfig.useMockMode {
@@ -192,9 +237,7 @@ class APIService {
             throw APIError.invalidResponse
         }
         
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.invalidResponse
-        }
+        try validateAuthenticatedResponse(httpResponse, data: data)
         
         let profileResponse = try JSONDecoder().decode(ProfileResponse.self, from: data)
         return profileResponse.user
@@ -255,12 +298,7 @@ class APIService {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw APIError.serverError(errorResponse.error)
-            }
-            throw APIError.serverError("Failed to update profile")
-        }
+        try validateAuthenticatedResponse(httpResponse, data: data)
         let profileResponse = try JSONDecoder().decode(ProfileResponse.self, from: data)
         return profileResponse.user
     }
@@ -296,9 +334,7 @@ class APIService {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.invalidResponse
-        }
+        try validateAuthenticatedResponse(httpResponse, data: data)
         let profileResponse = try JSONDecoder().decode(FacilityProfileResponse.self, from: data)
         return profileResponse.data
     }
@@ -357,12 +393,7 @@ class APIService {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw APIError.serverError(errorResponse.error)
-            }
-            throw APIError.serverError("Failed to update facility profile")
-        }
+        try validateAuthenticatedResponse(httpResponse, data: data)
         let profileResponse = try JSONDecoder().decode(FacilityProfileResponse.self, from: data)
         return profileResponse.data
     }
@@ -658,7 +689,7 @@ class APIService {
         }
         
         // Real API mode - connect to server
-        guard let url = URL(string: "\(APIConfig.baseURL)/api/facilities/signup") else {
+        guard let url = URL(string: APIConfig.Facilities.signUp) else {
             throw APIError.invalidURL
         }
         
@@ -1491,6 +1522,14 @@ struct Facility: Codable {
     }
 }
 
+// MARK: - Notification Names
+
+extension Notification.Name {
+    /// Posted by APIService when any authenticated request receives a 401 response.
+    /// Observers (e.g. ContentView) should log the user out when this fires.
+    static let didReceiveUnauthorizedResponse = Notification.Name("YolkuDidReceiveUnauthorizedResponse")
+}
+
 // MARK: - API Errors
 
 enum APIError: Error, LocalizedError {
@@ -1499,7 +1538,8 @@ enum APIError: Error, LocalizedError {
     case invalidData
     case serverError(String)
     case networkError
-    
+    case unauthorized
+
     var errorDescription: String? {
         switch self {
         case .invalidURL:
@@ -1512,6 +1552,8 @@ enum APIError: Error, LocalizedError {
             return message
         case .networkError:
             return "Network connection error"
+        case .unauthorized:
+            return "Your session has expired. Please sign in again."
         }
     }
 }
