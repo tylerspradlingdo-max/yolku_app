@@ -384,9 +384,9 @@ struct HousingView: View {
                 loadErrorMessage = "No available housing listings were returned."
             }
         } catch {
-            print("Failed to load housing listings: \(error.localizedDescription)")
+            NSLog("Failed to load housing listings: %@", error.localizedDescription)
             listings = sampleListings
-            loadErrorMessage = "Live listings are unavailable right now. Showing backup listings."
+            loadErrorMessage = "Live listings are unavailable right now. Showing sample listings."
         }
 
         isLoading = false
