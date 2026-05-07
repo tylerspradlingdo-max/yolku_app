@@ -89,9 +89,18 @@ router.patch('/profile', authMiddleware, async (req, res) => {
     if (profession !== undefined) user.profession = profession;
     if (licenseNumber !== undefined) user.licenseNumber = licenseNumber;
     if (address !== undefined) user.address = address;
-    if (credentials !== undefined) user.credentials = credentials;
-    if (stateLicenses !== undefined) user.stateLicenses = stateLicenses;
-    if (boardCertifications !== undefined) user.boardCertifications = boardCertifications;
+    if (credentials !== undefined) {
+      user.credentials = credentials;
+      user.changed('credentials', true);
+    }
+    if (stateLicenses !== undefined) {
+      user.stateLicenses = stateLicenses;
+      user.changed('stateLicenses', true);
+    }
+    if (boardCertifications !== undefined) {
+      user.boardCertifications = boardCertifications;
+      user.changed('boardCertifications', true);
+    }
 
     await user.save();
 

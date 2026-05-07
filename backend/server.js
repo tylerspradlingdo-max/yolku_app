@@ -89,6 +89,11 @@ app.listen(PORT, async () => {
   try {
     const sequelize = require('./config/database');
     await sequelize.sync();
+    // Ensure extended user profile columns exist (idempotent — safe to run on every restart)
+    await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS credentials TEXT[] DEFAULT '{}'`);
+    await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "stateLicenses" JSONB DEFAULT '[]'`);
+    await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "boardCertifications" JSONB DEFAULT '[]'`);
+    await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS address VARCHAR(255)`);
     console.log('✅ Database schema synced');
   } catch (err) {
     console.error('⚠️  Database sync warning:', err.message);

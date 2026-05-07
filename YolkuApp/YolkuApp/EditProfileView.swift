@@ -262,7 +262,7 @@ struct EditProfileView: View {
                 lastName: lastName,
                 phoneNumber: phone.isEmpty ? nil : phone,
                 address: address.isEmpty ? nil : address,
-                credentials: credArray.isEmpty ? nil : credArray,
+                credentials: credArray,
                 stateLicenses: licenseItems.isEmpty ? nil : licenseItems,
                 boardCertifications: certItems.isEmpty ? nil : certItems
             )
@@ -282,7 +282,7 @@ struct EditProfileView: View {
         defaults.set(user.email, forKey: "profileEmail")
         if let phone = user.phoneNumber { defaults.set(phone, forKey: "profilePhone") }
         if let addr = user.address { defaults.set(addr, forKey: "profileAddress") }
-        if let creds = user.credentials { defaults.set(creds, forKey: "profileCredentials") }
+        defaults.set(user.credentials ?? [], forKey: "profileCredentials")
         if let licenses = user.stateLicenses,
            let encoded = try? JSONEncoder().encode(licenses.map { StateLicense(state: $0.state, licenseNumber: $0.licenseNumber) }) {
             defaults.set(encoded, forKey: "profileStateLicenses")

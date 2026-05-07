@@ -249,7 +249,7 @@ class APIService {
         lastName: String,
         phoneNumber: String?,
         address: String?,
-        credentials: [String]?,
+        credentials: [String],
         stateLicenses: [StateLicenseItem]?,
         boardCertifications: [BoardCertificationItem]?
     ) async throws -> User {
@@ -1262,14 +1262,29 @@ struct CreatePositionRequest: Codable {
     let openings: Int
 }
 
-struct UpdateWorkerProfileRequest: Codable {
+struct UpdateWorkerProfileRequest: Encodable {
     let firstName: String
     let lastName: String
     let phoneNumber: String?
     let address: String?
-    let credentials: [String]?
+    let credentials: [String]
     let stateLicenses: [StateLicenseItem]?
     let boardCertifications: [BoardCertificationItem]?
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(firstName, forKey: .firstName)
+        try container.encode(lastName, forKey: .lastName)
+        try container.encodeIfPresent(phoneNumber, forKey: .phoneNumber)
+        try container.encodeIfPresent(address, forKey: .address)
+        try container.encode(credentials, forKey: .credentials)
+        try container.encodeIfPresent(stateLicenses, forKey: .stateLicenses)
+        try container.encodeIfPresent(boardCertifications, forKey: .boardCertifications)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case firstName, lastName, phoneNumber, address, credentials, stateLicenses, boardCertifications
+    }
 }
 
 struct UpdateFacilityProfileRequest: Codable {
