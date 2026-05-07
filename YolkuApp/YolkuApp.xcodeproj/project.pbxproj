@@ -42,6 +42,7 @@
 		FA000009000000000000005 /* JobDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000010000000000000005 /* JobDatabase.swift */; };
 		AN000001000000000000001 /* ApplyNowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AN000002000000000000001 /* ApplyNowView.swift */; };
 		KC000001000000000000001 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = KC000002000000000000001 /* KeychainService.swift */; };
+		FB100001000000000000001 /* ForgotPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB100002000000000000001 /* ForgotPasswordView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -81,6 +82,7 @@
 		FA000010000000000000005 /* JobDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobDatabase.swift; sourceTree = "<group>"; };
 		AN000002000000000000001 /* ApplyNowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplyNowView.swift; sourceTree = "<group>"; };
 		KC000002000000000000001 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		FB100002000000000000001 /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,6 +139,7 @@
 				FA000010000000000000005 /* JobDatabase.swift */,
 				AN000002000000000000001 /* ApplyNowView.swift */,
 				KC000002000000000000001 /* KeychainService.swift */,
+				FB100002000000000000001 /* ForgotPasswordView.swift */,
 				A1000016000000000000001 /* ColorExtension.swift */,
 				A1000018000000000000001 /* ButtonStyles.swift */,
 				A1000020000000000000001 /* Assets.xcassets */,
@@ -255,6 +258,7 @@
 				FA000009000000000000005 /* JobDatabase.swift in Sources */,
 				AN000001000000000000001 /* ApplyNowView.swift in Sources */,
 				KC000001000000000000001 /* KeychainService.swift in Sources */,
+				FB100001000000000000001 /* ForgotPasswordView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
