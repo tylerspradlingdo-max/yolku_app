@@ -68,6 +68,10 @@ struct APIConfig {
         static let match = "\(baseURL)\(apiPath)/ai/match"
         static let professions = "\(baseURL)\(apiPath)/ai/professions"
     }
+
+    struct Housing {
+        static let list = "\(baseURL)\(apiPath)/housing"
+    }
     
     struct Facilities {
         static let signUp = "\(baseURL)\(apiPath)/facilities/signup"

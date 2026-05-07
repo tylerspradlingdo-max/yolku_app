@@ -18,7 +18,7 @@ enum HousingType: String, CaseIterable {
 
 // MARK: - Housing Listing Model
 struct HousingListing: Identifiable {
-    let id: UUID
+    let id: String
     let title: String
     let address: String
     let city: String
@@ -33,7 +33,7 @@ struct HousingListing: Identifiable {
     let amenities: [String]
 
     init(
-        id: UUID = UUID(),
+        id: String = UUID().uuidString,
         title: String,
         address: String,
         city: String,
@@ -154,8 +154,9 @@ struct HousingView: View {
     @State private var showTypeFilter = false
     @State private var showFurnishedOnly = false
     @State private var selectedListing: HousingListing? = nil
-
-    private let listings = sampleListings
+    @State private var listings: [HousingListing] = []
+    @State private var isLoading = false
+    @State private var loadErrorMessage: String? = nil
 
     var filteredListings: [HousingListing] {
         listings.filter { listing in
@@ -285,23 +286,34 @@ struct HousingView: View {
                 // Listings
                 ScrollView {
                     VStack(spacing: 16) {
-                        if filteredListings.isEmpty {
+                        if isLoading {
+                            ProgressView("Loading listings...")
+                                .padding(.top, 60)
+                        } else if filteredListings.isEmpty {
                             VStack(spacing: 20) {
                                 Image(systemName: "house.slash")
                                     .font(.system(size: 60))
                                     .foregroundColor(Color(hex: "667eea").opacity(0.3))
                                     .padding(.top, 60)
 
-                                Text("No Listings Found")
+                                Text(loadErrorMessage == nil ? "No Listings Found" : "Couldn't Load Listings")
                                     .font(.title3)
                                     .fontWeight(.semibold)
                                     .foregroundColor(Color(hex: "333333"))
 
-                                Text("Try adjusting your search or filters\nto find available housing.")
+                                Text(loadErrorMessage ?? "Try adjusting your search or filters\nto find available housing.")
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 40)
+
+                                if loadErrorMessage != nil {
+                                    Button("Retry") {
+                                        Task { await loadListings() }
+                                    }
+                                    .buttonStyle(GradientButtonStyle())
+                                    .padding(.horizontal, 40)
+                                }
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 40)
@@ -335,7 +347,48 @@ struct HousingView: View {
             .sheet(item: $selectedListing) { listing in
                 HousingDetailView(listing: listing)
             }
+            .task {
+                if listings.isEmpty && !isLoading {
+                    await loadListings()
+                }
+            }
         }
+    }
+
+    private func loadListings() async {
+        isLoading = true
+        loadErrorMessage = nil
+
+        do {
+            let remoteListings = try await APIService.shared.getHousingListings()
+            let mapped = remoteListings.compactMap { remote -> HousingListing? in
+                guard let type = HousingType(rawValue: remote.type) else { return nil }
+                return HousingListing(
+                    id: remote.id,
+                    title: remote.title,
+                    address: remote.address,
+                    city: remote.city,
+                    state: remote.state,
+                    pricePerWeek: remote.pricePerWeek,
+                    type: type,
+                    isFurnished: remote.isFurnished,
+                    isAvailable: remote.isAvailable,
+                    distanceToFacility: remote.distanceToFacility,
+                    contactName: remote.contactName,
+                    contactPhone: remote.contactPhone,
+                    amenities: remote.amenities
+                )
+            }
+            listings = mapped
+            if mapped.isEmpty {
+                loadErrorMessage = "No available housing listings were returned."
+            }
+        } catch {
+            listings = sampleListings
+            loadErrorMessage = "Live listings are unavailable right now. Showing backup listings."
+        }
+
+        isLoading = false
     }
 }
 

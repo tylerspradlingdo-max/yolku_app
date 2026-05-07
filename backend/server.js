@@ -16,6 +16,7 @@ const positionsRoutes = require('./routes/positions');
 const facilitiesRoutes = require('./routes/facilities');
 const messagesRoutes = require('./routes/messages');
 const aiRoutes = require('./routes/ai');
+const housingRoutes = require('./routes/housing');
 
 // Middleware
 app.use(helmet()); // Security headers
@@ -36,6 +37,7 @@ app.use('/api/positions', positionsRoutes);
 app.use('/api/facilities', facilitiesRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/housing', housingRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -50,7 +52,8 @@ app.get('/', (req, res) => {
       positions: '/api/positions',
       facilities: '/api/facilities',
       messages: '/api/messages',
-      ai: '/api/ai'
+      ai: '/api/ai',
+      housing: '/api/housing'
     }
   });
 });
