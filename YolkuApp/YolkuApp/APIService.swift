@@ -805,6 +805,30 @@ class APIService {
         let statesResponse = try JSONDecoder().decode(StatesResponse.self, from: data)
         return statesResponse.data
     }
+
+    // MARK: - Housing
+
+    func getHousingListings() async throws -> [RemoteHousingListing] {
+        guard let url = URL(string: APIConfig.Housing.list) else {
+            throw APIError.invalidURL
+        }
+
+        let (data, response) = try await URLSession.shared.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.error)
+            }
+            throw APIError.serverError("Failed to fetch housing listings")
+        }
+
+        let result = try JSONDecoder().decode(HousingListingsResponse.self, from: data)
+        return result.data
+    }
     
     // MARK: - Chat / Messaging
     
@@ -1462,6 +1486,27 @@ struct PositionsResponse: Codable {
 struct StatesResponse: Codable {
     let success: Bool
     let data: [String]
+}
+
+struct HousingListingsResponse: Codable {
+    let success: Bool
+    let data: [RemoteHousingListing]
+}
+
+struct RemoteHousingListing: Codable {
+    let id: String
+    let title: String
+    let address: String
+    let city: String
+    let state: String
+    let pricePerWeek: Int
+    let type: String
+    let isFurnished: Bool
+    let isAvailable: Bool
+    let distanceToFacility: String
+    let contactName: String
+    let contactPhone: String
+    let amenities: [String]
 }
 
 struct Position: Codable, Identifiable {
