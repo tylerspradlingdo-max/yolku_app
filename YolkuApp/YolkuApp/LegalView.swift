@@ -61,10 +61,10 @@ private struct TermsOfServiceContent: View {
             LegalParagraph(text: "Last updated: January 2026")
 
             LegalSectionHeader(text: "1. Acceptance of Terms")
-            LegalParagraph(text: "By downloading, installing, or using the Yolku mobile application ("App"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use the App.")
+            LegalParagraph(text: "By downloading, installing, or using the Yolku mobile application (\"App\"), you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree to these Terms, do not use the App.")
 
             LegalSectionHeader(text: "2. Description of Service")
-            LegalParagraph(text: "Yolku is a healthcare staffing platform that connects healthcare professionals ("Workers") with healthcare facilities ("Facilities"). The App facilitates the discovery, communication, and coordination of staffing arrangements.")
+            LegalParagraph(text: "Yolku is a healthcare staffing platform that connects healthcare professionals (\"Workers\") with healthcare facilities (\"Facilities\"). The App facilitates the discovery, communication, and coordination of staffing arrangements.")
 
             LegalSectionHeader(text: "3. Eligibility")
             LegalParagraph(text: "You must be at least 18 years of age and legally permitted to work in your jurisdiction to use this App. By registering, you represent and warrant that you meet these requirements.")
@@ -108,7 +108,7 @@ private struct PrivacyPolicyContent: View {
             LegalParagraph(text: "Last updated: January 2026")
 
             LegalSectionHeader(text: "1. Introduction")
-            LegalParagraph(text: "Yolku ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Yolku mobile application.")
+            LegalParagraph(text: "Yolku (\"we\", \"our\", or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Yolku mobile application.")
 
             LegalSectionHeader(text: "2. Information We Collect")
             LegalParagraph(text: "We collect the following categories of personal information:\n\n• Account information: name, email address, phone number, and password.\n• Professional information: profession, license numbers, credentials, state licenses, and board certifications.\n• Location data: state and city for job matching purposes.\n• Communications: messages exchanged between Workers and Facilities through the App.\n• Usage data: how you interact with the App, including features used and time spent.\n• Profile images: photos you voluntarily upload from your photo library.")
