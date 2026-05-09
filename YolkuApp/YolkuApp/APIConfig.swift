@@ -43,6 +43,7 @@ struct APIConfig {
     
     struct Users {
         static let profile = "\(baseURL)\(apiPath)/users/profile"
+        static let deleteAccount = "\(baseURL)\(apiPath)/users/account"
     }
     
     struct Health {
@@ -78,6 +79,7 @@ struct APIConfig {
         static let signIn = "\(baseURL)\(apiPath)/facilities/signin"
         static let profile = "\(baseURL)\(apiPath)/facilities/profile"
         static let positions = "\(baseURL)\(apiPath)/facilities/positions"
+        static let deleteAccount = "\(baseURL)\(apiPath)/facilities/account"
         static func position(id: String) -> String {
             return "\(baseURL)\(apiPath)/facilities/positions/\(id)"
         }

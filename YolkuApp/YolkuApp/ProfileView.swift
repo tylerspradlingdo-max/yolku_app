@@ -19,6 +19,13 @@ struct ProfileView: View {
     @State private var showingDocuments = false
     @State private var showingHousing = false
     @State private var showingEditProfile = false
+    @State private var showingDeleteAccountAlert = false
+    @State private var showingDeleteAccountConfirm = false
+    @State private var isDeletingAccount = false
+    @State private var deleteAccountError: String? = nil
+    @State private var showingTerms = false
+    @State private var showingPrivacy = false
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
 
     // Persisted profile data (refreshed when returning from Edit Profile)
     @State private var displayFirstName: String = ""
@@ -162,6 +169,18 @@ struct ProfileView: View {
                             title: "Settings",
                             action: {}
                         )
+                        
+                        ProfileActionButton(
+                            icon: "doc.plaintext.fill",
+                            title: "Terms of Service",
+                            action: { showingTerms = true }
+                        )
+                        
+                        ProfileActionButton(
+                            icon: "lock.shield.fill",
+                            title: "Privacy Policy",
+                            action: { showingPrivacy = true }
+                        )
                     }
                     .padding(.horizontal, 24)
                     
@@ -183,6 +202,29 @@ struct ProfileView: View {
                     .padding(.horizontal, 24)
                     .padding(.top, 8)
                     
+                    // Delete Account Button
+                    Button(action: { showingDeleteAccountAlert = true }) {
+                        HStack {
+                            Image(systemName: "trash.fill")
+                                .font(.system(size: 20))
+                            Text("Delete Account")
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.white)
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                        )
+                        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 8)
+                    .disabled(isDeletingAccount)
+                    
                     Spacer(minLength: 40)
                 }
             }
@@ -200,6 +242,36 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $showingEditProfile, onDismiss: loadProfileData) {
                 EditProfileView()
+            }
+            .sheet(isPresented: $showingTerms) {
+                LegalView(document: .termsOfService)
+            }
+            .sheet(isPresented: $showingPrivacy) {
+                LegalView(document: .privacyPolicy)
+            }
+            .alert("Delete Account", isPresented: $showingDeleteAccountAlert) {
+                Button("Cancel", role: .cancel) {}
+                Button("Continue", role: .destructive) {
+                    showingDeleteAccountConfirm = true
+                }
+            } message: {
+                Text("This will permanently delete your account and all associated data. This action cannot be undone.")
+            }
+            .alert("Are you sure?", isPresented: $showingDeleteAccountConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete My Account", role: .destructive) {
+                    Task { await performDeleteAccount() }
+                }
+            } message: {
+                Text("Your account, profile, and all data will be permanently removed.")
+            }
+            .alert("Error", isPresented: Binding(
+                get: { deleteAccountError != nil },
+                set: { if !$0 { deleteAccountError = nil } }
+            )) {
+                Button("OK") {}
+            } message: {
+                Text(deleteAccountError ?? "An error occurred.")
             }
             .onAppear {
                 loadProfileImage()
@@ -229,6 +301,31 @@ struct ProfileView: View {
     private func saveProfileImage(_ image: UIImage) {
         if let imageData = image.jpegData(compressionQuality: 0.7) {
             UserDefaults.standard.set(imageData, forKey: "profileImage")
+        }
+    }
+
+    // Permanently delete the worker account
+    private func performDeleteAccount() async {
+        isDeletingAccount = true
+        defer { isDeletingAccount = false }
+        let token = KeychainService.load(key: "authToken") ?? ""
+        do {
+            try await APIService.shared.deleteWorkerAccount(token: token)
+            await MainActor.run {
+                KeychainService.delete(key: "authToken")
+                let keys = [
+                    "userId", "userEmail", "userFirstName", "userProfession", "userType",
+                    "profileFirstName", "profileLastName", "profileEmail", "profilePhone",
+                    "profileAddress", "profileCredentials", "profileStateLicenses",
+                    "profileBoardCertifications", "profileImage"
+                ]
+                keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+                isLoggedIn = false
+            }
+        } catch {
+            await MainActor.run {
+                deleteAccountError = "Failed to delete account. Please try again or contact support@yolku.com."
+            }
         }
     }
 }
