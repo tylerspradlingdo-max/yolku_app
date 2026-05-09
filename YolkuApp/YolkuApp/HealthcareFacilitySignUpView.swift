@@ -138,18 +138,17 @@ struct HealthcareFacilitySignUpView: View {
                                     .font(.system(size: 24))
                             }
                             
-                            (Text("I agree to the ")
-                                .foregroundColor(Color(hex: "666666")) +
-                             Text("Terms of Service")
-                                .foregroundColor(Color(hex: "667eea"))
-                                .underline() +
-                             Text(" and ")
-                                .foregroundColor(Color(hex: "666666")) +
-                             Text("Privacy Policy")
-                                .foregroundColor(Color(hex: "667eea"))
-                                .underline())
+                            HStack(spacing: 0) {
+                                Text("I agree to the ")
+                                    .foregroundColor(Color(hex: "666666"))
+                                Button("Terms of Service") { showingTerms = true }
+                                    .foregroundColor(Color(hex: "667eea"))
+                                Text(" and ")
+                                    .foregroundColor(Color(hex: "666666"))
+                                Button("Privacy Policy") { showingPrivacy = true }
+                                    .foregroundColor(Color(hex: "667eea"))
+                            }
                             .font(.system(size: 14))
-                            .onTapGesture { showingTerms = true }
                         }
                         .padding(.top, 8)
                     }
