@@ -1568,6 +1568,50 @@ struct Position: Codable, Identifiable {
         
         return "\(startTimeStr) - \(endTimeStr)"
     }
+
+    // MARK: - Account Deletion
+
+    /// Permanently deletes the current worker's account on the server.
+    func deleteWorkerAccount(token: String) async throws {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 500_000_000)
+            return
+        }
+
+        guard let url = URL(string: APIConfig.Users.deleteAccount) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        try validateAuthenticatedResponse(httpResponse, data: data)
+    }
+
+    /// Permanently deletes the current facility's account on the server.
+    func deleteFacilityAccount(token: String) async throws {
+        if APIConfig.useMockMode {
+            try await Task.sleep(nanoseconds: 500_000_000)
+            return
+        }
+
+        guard let url = URL(string: APIConfig.Facilities.deleteAccount) else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        try validateAuthenticatedResponse(httpResponse, data: data)
+    }
 }
 
 struct Facility: Codable {

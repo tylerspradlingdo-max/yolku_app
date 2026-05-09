@@ -24,6 +24,8 @@ struct HealthcareWorkerSignUpView: View {
     @State private var alertMessage = ""
     @State private var isLoading = false
     @State private var navigateToDashboard = false
+    @State private var showingTerms = false
+    @State private var showingPrivacy = false
     
     let professions = [
         "Registered Nurse (RN)",
@@ -107,9 +109,18 @@ struct HealthcareWorkerSignUpView: View {
                                     .font(.system(size: 24))
                             }
                             
-                            Text("I agree to the Terms of Service and Privacy Policy")
-                                .font(.system(size: 14))
-                                .foregroundColor(Color(hex: "666666"))
+                            (Text("I agree to the ")
+                                .foregroundColor(Color(hex: "666666")) +
+                             Text("Terms of Service")
+                                .foregroundColor(Color(hex: "667eea"))
+                                .underline() +
+                             Text(" and ")
+                                .foregroundColor(Color(hex: "666666")) +
+                             Text("Privacy Policy")
+                                .foregroundColor(Color(hex: "667eea"))
+                                .underline())
+                            .font(.system(size: 14))
+                            .onTapGesture { showingTerms = true }
                         }
                         .padding(.top, 8)
                     }
@@ -187,6 +198,12 @@ struct HealthcareWorkerSignUpView: View {
                 }
             } message: {
                 Text(alertMessage)
+            }
+            .sheet(isPresented: $showingTerms) {
+                LegalView(document: .termsOfService)
+            }
+            .sheet(isPresented: $showingPrivacy) {
+                LegalView(document: .privacyPolicy)
             }
             .fullScreenCover(isPresented: $navigateToDashboard) {
                 DashboardView()
