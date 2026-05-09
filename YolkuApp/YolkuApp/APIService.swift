@@ -571,20 +571,16 @@ class APIService {
                 ?? UserDefaults.standard.string(forKey: "facilityEmail")
                 ?? "mock-facility"
             let existing = JobDatabase.shared.allPositions().first { $0.id == positionId }
-            let existingFacilityName = existing?.facilityName
-            let existingFacilityCity = existing?.facilityCity
-            let existingFacilityState = existing?.facilityState
-            let existingFacilityType = existing?.facilityType
-            let storedFacilityName = existingFacilityName
+            let storedFacilityName = existing?.facilityName
                 ?? UserDefaults.standard.string(forKey: "facilityName")
                 ?? "Healthcare Facility"
-            let storedFacilityCity = existingFacilityCity
+            let storedFacilityCity = existing?.facilityCity
                 ?? UserDefaults.standard.string(forKey: "facilityCity")
                 ?? ""
-            let storedFacilityState = existingFacilityState
+            let storedFacilityState = existing?.facilityState
                 ?? UserDefaults.standard.string(forKey: "facilityState")
                 ?? ""
-            let storedFacilityType = existingFacilityType
+            let storedFacilityType = existing?.facilityType
                 ?? UserDefaults.standard.string(forKey: "facilityType")
                 ?? "Hospital"
             let updated = FacilityPosition(
