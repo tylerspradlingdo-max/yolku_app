@@ -33,251 +33,266 @@ struct ProfileView: View {
     @State private var displayEmail: String = ""
     @State private var displayPhone: String = ""
     @State private var displayCredentials: [String] = []
+
+    private var deleteAccountErrorBinding: Binding<Bool> {
+        Binding(
+            get: { deleteAccountError != nil },
+            set: { if !$0 { deleteAccountError = nil } }
+        )
+    }
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Profile Header
-                    VStack(spacing: 16) {
-                        // Profile Picture with Upload
-                        Button(action: { showingImagePicker = true }) {
-                            ZStack(alignment: .bottomTrailing) {
-                                // Profile Image or Placeholder
-                                if let selectedImage = selectedImage {
-                                    Image(uiImage: selectedImage)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 100, height: 100)
-                                        .clipShape(Circle())
-                                } else {
-                                    Circle()
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            )
-                                        )
-                                        .frame(width: 100, height: 100)
-                                    
-                                    Text(firstName.prefix(1).uppercased())
-                                        .font(.system(size: 40, weight: .bold))
-                                        .foregroundColor(.white)
-                                }
-                                
-                                // Camera Icon Overlay
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(width: 32, height: 32)
-                                    
-                                    Image(systemName: "camera.fill")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "667eea"))
-                                }
-                                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                                .offset(x: -2, y: -2)
-                            }
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        
-                        VStack(spacing: 4) {
-                            Text(displayLastName.isEmpty ? displayFirstName : "\(displayFirstName) \(displayLastName)")
-                                .font(.title2)
-                                .fontWeight(.bold)
-
-                            if !displayCredentials.isEmpty {
-                                Text(displayCredentials.joined(separator: ", "))
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(Color(hex: "667eea"))
-                            } else {
-                                Text(profession)
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                            }
-
-                            Text(displayEmail)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-
-                            if !displayPhone.isEmpty {
-                                Text(displayPhone)
-                                    .font(.footnote)
-                                    .foregroundColor(.gray)
-                            }
-                        }
-                    }
-                    .padding(.top, 20)
-                    
-                    // Profile Stats
-                    HStack(spacing: 20) {
-                        ProfileStat(value: "0", label: "Shifts")
-                        
-                        Divider()
-                            .frame(height: 40)
-                        
-                        ProfileStat(value: "5.0", label: "Rating")
-                        
-                        Divider()
-                            .frame(height: 40)
-                        
-                        ProfileStat(value: "$0", label: "Earned")
-                    }
-                    .padding(.horizontal, 40)
-                    .padding(.vertical, 20)
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
-                    .padding(.horizontal, 24)
-                    
-                    // Profile Actions
-                    VStack(spacing: 12) {
-                        ProfileActionButton(
-                            icon: "person.fill",
-                            title: "Edit Profile",
-                            action: { showingEditProfile = true }
-                        )
-                        
-                        ProfileActionButton(
-                            icon: "doc.text.fill",
-                            title: "Documents & Licenses",
-                            action: { showingDocuments = true }
-                        )
-                        
-                        ProfileActionButton(
-                            icon: "house.fill",
-                            title: "Find Housing",
-                            action: { showingHousing = true }
-                        )
-                        
-                        ProfileActionButton(
-                            icon: "bell.fill",
-                            title: "Notifications",
-                            action: {}
-                        )
-                        
-                        ProfileActionButton(
-                            icon: "questionmark.circle.fill",
-                            title: "Help & Support",
-                            action: {}
-                        )
-                        
-                        ProfileActionButton(
-                            icon: "gearshape.fill",
-                            title: "Settings",
-                            action: {}
-                        )
-                        
-                        ProfileActionButton(
-                            icon: "doc.plaintext.fill",
-                            title: "Terms of Service",
-                            action: { showingTerms = true }
-                        )
-                        
-                        ProfileActionButton(
-                            icon: "lock.shield.fill",
-                            title: "Privacy Policy",
-                            action: { showingPrivacy = true }
-                        )
-                    }
-                    .padding(.horizontal, 24)
-                    
-                    // Logout Button
-                    Button(action: onLogout) {
-                        HStack {
-                            Image(systemName: "arrow.right.square.fill")
-                                .font(.system(size: 20))
-                            Text("Sign Out")
-                                .font(.system(size: 16, weight: .semibold))
-                        }
-                        .foregroundColor(.red)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.white)
-                        .cornerRadius(12)
-                        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                    
-                    // Delete Account Button
-                    Button(action: { showingDeleteAccountAlert = true }) {
-                        HStack {
-                            Image(systemName: "trash.fill")
-                                .font(.system(size: 20))
-                            Text("Delete Account")
-                                .font(.system(size: 16, weight: .semibold))
-                        }
-                        .foregroundColor(.red)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.white)
-                        .cornerRadius(12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.red.opacity(0.3), lineWidth: 1)
-                        )
-                        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 8)
-                    .disabled(isDeletingAccount)
-                    
-                    Spacer(minLength: 40)
+            profileContent
+                .sheet(isPresented: $showingImagePicker) {
+                    ImagePicker(selectedImage: $selectedImage)
                 }
-            }
-            .background(Color(hex: "f5f5f5"))
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented: $showingImagePicker) {
-                ImagePicker(selectedImage: $selectedImage)
-            }
-            .sheet(isPresented: $showingDocuments) {
-                DocumentsView()
-            }
-            .sheet(isPresented: $showingHousing) {
-                HousingView()
-            }
-            .sheet(isPresented: $showingEditProfile, onDismiss: loadProfileData) {
-                EditProfileView()
-            }
-            .sheet(isPresented: $showingTerms) {
-                LegalView(document: .termsOfService)
-            }
-            .sheet(isPresented: $showingPrivacy) {
-                LegalView(document: .privacyPolicy)
-            }
-            .alert("Delete Account", isPresented: $showingDeleteAccountAlert) {
-                Button("Cancel", role: .cancel) {}
-                Button("Continue", role: .destructive) {
-                    showingDeleteAccountConfirm = true
+                .sheet(isPresented: $showingDocuments) {
+                    DocumentsView()
                 }
-            } message: {
-                Text("This will permanently delete your account and all associated data. This action cannot be undone.")
-            }
-            .alert("Are you sure?", isPresented: $showingDeleteAccountConfirm) {
-                Button("Cancel", role: .cancel) {}
-                Button("Delete My Account", role: .destructive) {
-                    Task { await performDeleteAccount() }
+                .sheet(isPresented: $showingHousing) {
+                    HousingView()
                 }
-            } message: {
-                Text("Your account, profile, and all data will be permanently removed.")
-            }
-            .alert("Error", isPresented: Binding(
-                get: { deleteAccountError != nil },
-                set: { if !$0 { deleteAccountError = nil } }
-            )) {
-                Button("OK") {}
-            } message: {
-                Text(deleteAccountError ?? "An error occurred.")
-            }
-            .onAppear {
-                loadProfileImage()
-                loadProfileData()
+                .sheet(isPresented: $showingEditProfile, onDismiss: loadProfileData) {
+                    EditProfileView()
+                }
+                .sheet(isPresented: $showingTerms) {
+                    LegalView(document: .termsOfService)
+                }
+                .sheet(isPresented: $showingPrivacy) {
+                    LegalView(document: .privacyPolicy)
+                }
+                .alert("Delete Account", isPresented: $showingDeleteAccountAlert) {
+                    Button("Cancel", role: .cancel) {}
+                    Button("Continue", role: .destructive) {
+                        showingDeleteAccountConfirm = true
+                    }
+                } message: {
+                    Text("This will permanently delete your account and all associated data. This action cannot be undone.")
+                }
+                .alert("Are you sure?", isPresented: $showingDeleteAccountConfirm) {
+                    Button("Cancel", role: .cancel) {}
+                    Button("Delete My Account", role: .destructive) {
+                        Task { await performDeleteAccount() }
+                    }
+                } message: {
+                    Text("Your account, profile, and all data will be permanently removed.")
+                }
+                .alert("Error", isPresented: deleteAccountErrorBinding) {
+                    Button("OK") {}
+                } message: {
+                    Text(deleteAccountError ?? "An error occurred.")
+                }
+                .onAppear {
+                    loadProfileImage()
+                    loadProfileData()
+                }
+        }
+    }
+
+    private var profileContent: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                profileHeaderSection
+                profileStatsSection
+                profileActionsSection
+                signOutButton
+                deleteAccountButton
+                Spacer(minLength: 40)
             }
         }
+        .background(Color(hex: "f5f5f5"))
+        .navigationTitle("Profile")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var profileHeaderSection: some View {
+        VStack(spacing: 16) {
+            Button(action: { showingImagePicker = true }) {
+                ZStack(alignment: .bottomTrailing) {
+                    if let selectedImage = selectedImage {
+                        Image(uiImage: selectedImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 100, height: 100)
+                            .clipShape(Circle())
+                    } else {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 100, height: 100)
+
+                        Text(firstName.prefix(1).uppercased())
+                            .font(.system(size: 40, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+
+                    ZStack {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 32, height: 32)
+
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(Color(hex: "667eea"))
+                    }
+                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    .offset(x: -2, y: -2)
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            VStack(spacing: 4) {
+                Text(displayLastName.isEmpty ? displayFirstName : "\(displayFirstName) \(displayLastName)")
+                    .font(.title2)
+                    .fontWeight(.bold)
+
+                if !displayCredentials.isEmpty {
+                    Text(displayCredentials.joined(separator: ", "))
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color(hex: "667eea"))
+                } else {
+                    Text(profession)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+
+                Text(displayEmail)
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+
+                if !displayPhone.isEmpty {
+                    Text(displayPhone)
+                        .font(.footnote)
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+        .padding(.top, 20)
+    }
+
+    private var profileStatsSection: some View {
+        HStack(spacing: 20) {
+            ProfileStat(value: "0", label: "Shifts")
+
+            Divider()
+                .frame(height: 40)
+
+            ProfileStat(value: "5.0", label: "Rating")
+
+            Divider()
+                .frame(height: 40)
+
+            ProfileStat(value: "$0", label: "Earned")
+        }
+        .padding(.horizontal, 40)
+        .padding(.vertical, 20)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
+        .padding(.horizontal, 24)
+    }
+
+    private var profileActionsSection: some View {
+        VStack(spacing: 12) {
+            ProfileActionButton(
+                icon: "person.fill",
+                title: "Edit Profile",
+                action: { showingEditProfile = true }
+            )
+
+            ProfileActionButton(
+                icon: "doc.text.fill",
+                title: "Documents & Licenses",
+                action: { showingDocuments = true }
+            )
+
+            ProfileActionButton(
+                icon: "house.fill",
+                title: "Find Housing",
+                action: { showingHousing = true }
+            )
+
+            ProfileActionButton(
+                icon: "bell.fill",
+                title: "Notifications",
+                action: {}
+            )
+
+            ProfileActionButton(
+                icon: "questionmark.circle.fill",
+                title: "Help & Support",
+                action: {}
+            )
+
+            ProfileActionButton(
+                icon: "gearshape.fill",
+                title: "Settings",
+                action: {}
+            )
+
+            ProfileActionButton(
+                icon: "doc.plaintext.fill",
+                title: "Terms of Service",
+                action: { showingTerms = true }
+            )
+
+            ProfileActionButton(
+                icon: "lock.shield.fill",
+                title: "Privacy Policy",
+                action: { showingPrivacy = true }
+            )
+        }
+        .padding(.horizontal, 24)
+    }
+
+    private var signOutButton: some View {
+        Button(action: onLogout) {
+            HStack {
+                Image(systemName: "arrow.right.square.fill")
+                    .font(.system(size: 20))
+                Text("Sign Out")
+                    .font(.system(size: 16, weight: .semibold))
+            }
+            .foregroundColor(.red)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Color.white)
+            .cornerRadius(12)
+            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 8)
+    }
+
+    private var deleteAccountButton: some View {
+        Button(action: { showingDeleteAccountAlert = true }) {
+            HStack {
+                Image(systemName: "trash.fill")
+                    .font(.system(size: 20))
+                Text("Delete Account")
+                    .font(.system(size: 16, weight: .semibold))
+            }
+            .foregroundColor(.red)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Color.white)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.red.opacity(0.3), lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 8)
+        .disabled(isDeletingAccount)
     }
     
     // Load saved profile image
