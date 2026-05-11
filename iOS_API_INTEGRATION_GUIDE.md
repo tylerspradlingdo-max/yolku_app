@@ -16,14 +16,14 @@ open YolkuApp.xcodeproj
 
 ### 2. Build Configuration
 
-The app automatically switches between development and production:
+The app now uses the production API by default, including normal Xcode debug runs.
 
-- **DEBUG builds** (running in Xcode): Uses `http://localhost:3000`
+- **DEBUG builds** (running in Xcode): Uses `https://yolku-9fce1d1d1bb6.herokuapp.com` by default
 - **RELEASE builds** (Archive for App Store): Uses `https://yolku-9fce1d1d1bb6.herokuapp.com`
 
-To test with production API in Xcode:
-1. Edit Scheme (⌘<)
-2. Run → Build Configuration → Change "Debug" to "Release"
+To point a debug build at a local backend instead:
+1. Open `YolkuApp/YolkuApp/APIConfig.swift`
+2. Set `useLocalDevelopmentServer` to `true`
 3. Run the app (⌘R)
 
 ### 3. Test the Sign Up Flow
@@ -58,11 +58,18 @@ To test with production API in Xcode:
 
 1. **`APIConfig.swift`** - API URL configuration
    ```swift
-   // Production URL (used in RELEASE builds)
+   // Production URL
    static let productionURL = "https://yolku-9fce1d1d1bb6.herokuapp.com"
    
-   // Development URL (used in DEBUG builds)
+   // Development URL
    static let developmentURL = "http://localhost:3000"
+
+   #if DEBUG
+   static let useLocalDevelopmentServer = false
+   static let baseURL = useLocalDevelopmentServer ? developmentURL : productionURL
+   #else
+   static let baseURL = productionURL
+   #endif
    ```
 
 2. **`APIService.swift`** - API service methods
