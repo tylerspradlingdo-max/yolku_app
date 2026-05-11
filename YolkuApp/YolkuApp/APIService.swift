@@ -760,15 +760,10 @@ class APIService {
                 }
             }
             
-            let isLastEndpoint = index == signUpEndpoints.count - 1
             if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
                 lastError = .serverError(errorResponse.error)
             } else {
                 lastError = .serverError("Facility sign up failed with status code: \(httpResponse.statusCode)")
-            }
-
-            if !isLastEndpoint {
-                continue
             }
         }
 
