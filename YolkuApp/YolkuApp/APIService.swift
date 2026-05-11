@@ -767,8 +767,7 @@ class APIService {
                 lastError = .serverError("Facility sign up failed with status code: \(httpResponse.statusCode)")
             }
 
-            let shouldRetry = httpResponse.statusCode == 404 && !isLastEndpoint
-            if shouldRetry {
+            if (httpResponse.statusCode == 404 || (500...599).contains(httpResponse.statusCode)) && !isLastEndpoint {
                 continue
             }
         }
