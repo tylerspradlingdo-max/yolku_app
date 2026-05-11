@@ -714,12 +714,15 @@ class APIService {
         )
         let requestBody = try JSONEncoder().encode(body)
         let signUpEndpoints = [APIConfig.Facilities.signUp, APIConfig.Facilities.signUpFallback]
-        var lastError: APIError = .serverError("Facility sign up failed due to an invalid endpoint configuration.")
+        var lastError: APIError = .serverError("Facility sign up failed.")
+        var attemptedRequest = false
         
         for (index, endpoint) in signUpEndpoints.enumerated() {
             guard let url = URL(string: endpoint) else {
-                throw APIError.invalidURL
+                lastError = .invalidURL
+                continue
             }
+            attemptedRequest = true
             
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
@@ -745,7 +748,7 @@ class APIService {
                         let facilityResponse = try JSONDecoder().decode(FacilityAuthResponse.self, from: data)
                         return facilityResponse
                     } catch {
-                        throw APIError.serverError("Facility sign up succeeded but returned an unexpected response format.")
+                        throw APIError.serverError("Facility sign up succeeded but returned an unexpected response format (expected FacilitySignUpAPIResponse or FacilityAuthResponse).")
                     }
                 }
             }
@@ -763,6 +766,9 @@ class APIService {
             break
         }
         
+        if !attemptedRequest {
+            throw APIError.serverError("Facility sign up failed: no valid endpoints available.")
+        }
         throw lastError
     }
     
