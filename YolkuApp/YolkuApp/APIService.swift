@@ -727,10 +727,18 @@ class APIService {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = requestBody
             
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let data: Data
+            let response: URLResponse
+            do {
+                (data, response) = try await URLSession.shared.data(for: request)
+            } catch {
+                lastError = .networkError(error.localizedDescription)
+                continue
+            }
             
             guard let httpResponse = response as? HTTPURLResponse else {
-                throw APIError.invalidResponse
+                lastError = .invalidResponse
+                continue
             }
             
             if (200...299).contains(httpResponse.statusCode) {
@@ -746,7 +754,8 @@ class APIService {
                         let facilityResponse = try JSONDecoder().decode(FacilityAuthResponse.self, from: data)
                         return facilityResponse
                     } catch {
-                        throw APIError.serverError("Facility sign up succeeded (status \(httpResponse.statusCode)) but returned an unexpected response format (expected FacilitySignUpAPIResponse or FacilityAuthResponse).")
+                        lastError = .serverError("Facility sign up succeeded (status \(httpResponse.statusCode)) but returned an unexpected response format (expected FacilitySignUpAPIResponse or FacilityAuthResponse).")
+                        continue
                     }
                 }
             }
@@ -761,7 +770,10 @@ class APIService {
             } else {
                 lastError = .serverError("Facility sign up failed with status code: \(httpResponse.statusCode)")
             }
-            break
+
+            if !isLastEndpoint {
+                continue
+            }
         }
 
         throw lastError
