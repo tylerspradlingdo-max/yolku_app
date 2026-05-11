@@ -767,12 +767,12 @@ class APIService {
                 lastError = .serverError("Facility sign up failed with status code: \(httpResponse.statusCode)")
             }
 
-            if (httpResponse.statusCode == 404 || (500...599).contains(httpResponse.statusCode)) && !isLastEndpoint {
+            if !isLastEndpoint {
                 continue
             }
         }
 
-        throw lastError ?? .serverError("Facility sign up failed.")
+        throw lastError ?? .serverError("Facility sign up failed after trying all configured endpoints.")
     }
     
     // MARK: - Positions
