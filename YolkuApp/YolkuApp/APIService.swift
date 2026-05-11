@@ -700,15 +700,6 @@ class APIService {
             )
         }
         
-        // Real API mode - connect to server
-        guard let url = URL(string: APIConfig.Facilities.signUp) else {
-            throw APIError.invalidURL
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
         let body = FacilitySignUpRequest(
             name: name,
             email: email,
@@ -721,28 +712,50 @@ class APIService {
             facilityType: facilityType,
             description: description
         )
+        let requestBody = try JSONEncoder().encode(body)
+        let signUpEndpoints = [APIConfig.Facilities.signUp, APIConfig.Facilities.signUpFallback]
         
-        request.httpBody = try JSONEncoder().encode(body)
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
-        }
-        
-        guard (200...299).contains(httpResponse.statusCode) else {
+        for (index, endpoint) in signUpEndpoints.enumerated() {
+            guard let url = URL(string: endpoint) else {
+                throw APIError.invalidURL
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = requestBody
+            
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw APIError.invalidResponse
+            }
+            
+            if (200...299).contains(httpResponse.statusCode) {
+                if let facilityResponse = try? JSONDecoder().decode(FacilitySignUpAPIResponse.self, from: data) {
+                    return FacilityAuthResponse(
+                        message: facilityResponse.message,
+                        token: facilityResponse.data.token,
+                        facility: facilityResponse.data.facility
+                    )
+                }
+                if let facilityResponse = try? JSONDecoder().decode(FacilityAuthResponse.self, from: data) {
+                    return facilityResponse
+                }
+                throw APIError.serverError("Facility sign up succeeded but returned an unexpected response format.")
+            }
+            
+            if httpResponse.statusCode == 404 && index < signUpEndpoints.count - 1 {
+                continue
+            }
+            
             if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
                 throw APIError.serverError(errorResponse.error)
             }
             throw APIError.serverError("Facility sign up failed with status code: \(httpResponse.statusCode)")
         }
         
-        let facilityResponse = try JSONDecoder().decode(FacilitySignUpAPIResponse.self, from: data)
-        return FacilityAuthResponse(
-            message: facilityResponse.message,
-            token: facilityResponse.data.token,
-            facility: facilityResponse.data.facility
-        )
+        throw APIError.serverError("Facility sign up failed due to an invalid endpoint configuration.")
     }
     
     // MARK: - Positions
