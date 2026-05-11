@@ -22,7 +22,7 @@ The app now uses the production API by default, including normal Xcode debug run
 - **RELEASE builds** (Archive for App Store): Uses `https://yolku-9fce1d1d1bb6.herokuapp.com`
 
 To point a debug build at a local backend instead:
-1. Open `/home/runner/work/yolku_app/yolku_app/YolkuApp/YolkuApp/APIConfig.swift`
+1. Open `YolkuApp/YolkuApp/APIConfig.swift`
 2. Set `useLocalDevelopmentServer` to `true`
 3. Run the app (⌘R)
 
@@ -61,15 +61,15 @@ To point a debug build at a local backend instead:
    // Production URL
    static let productionURL = "https://yolku-9fce1d1d1bb6.herokuapp.com"
    
-    // Development URL
-    static let developmentURL = "http://localhost:3000"
+   // Development URL
+   static let developmentURL = "http://localhost:3000"
 
-    #if DEBUG
-    static let useLocalDevelopmentServer = false
-    static let baseURL = useLocalDevelopmentServer ? developmentURL : productionURL
-    #else
-    static let baseURL = productionURL
-    #endif
+   #if DEBUG
+   static let useLocalDevelopmentServer = false
+   static let baseURL = useLocalDevelopmentServer ? developmentURL : productionURL
+   #else
+   static let baseURL = productionURL
+   #endif
    ```
 
 2. **`APIService.swift`** - API service methods
