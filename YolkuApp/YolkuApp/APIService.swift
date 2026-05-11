@@ -714,7 +714,7 @@ class APIService {
         )
         let requestBody = try JSONEncoder().encode(body)
         let signUpEndpoints = [APIConfig.Facilities.signUp, APIConfig.Facilities.signUpFallback]
-        var lastError: APIError = .serverError("All facility sign up endpoints failed.")
+        var lastError: APIError?
         
         for (index, endpoint) in signUpEndpoints.enumerated() {
             guard let url = URL(string: endpoint) else {
@@ -761,22 +761,19 @@ class APIService {
             }
             
             let isLastEndpoint = index == signUpEndpoints.count - 1
-            if httpResponse.statusCode == 404 && !isLastEndpoint {
-                continue
-            }
-            
             if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
                 lastError = .serverError(errorResponse.error)
             } else {
                 lastError = .serverError("Facility sign up failed with status code: \(httpResponse.statusCode)")
             }
 
-            if !isLastEndpoint {
+            let shouldRetry = httpResponse.statusCode == 404 && !isLastEndpoint
+            if shouldRetry {
                 continue
             }
         }
 
-        throw lastError
+        throw lastError ?? .serverError("Facility sign up failed.")
     }
     
     // MARK: - Positions
