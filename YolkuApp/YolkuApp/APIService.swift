@@ -716,7 +716,7 @@ class APIService {
         let signUpEndpoints = [APIConfig.Facilities.signUp, APIConfig.Facilities.signUpFallback]
         var lastError: APIError?
         
-        for (index, endpoint) in signUpEndpoints.enumerated() {
+        for endpoint in signUpEndpoints {
             guard let url = URL(string: endpoint) else {
                 lastError = .invalidURL
                 continue
@@ -754,7 +754,7 @@ class APIService {
                         let facilityResponse = try JSONDecoder().decode(FacilityAuthResponse.self, from: data)
                         return facilityResponse
                     } catch {
-                        lastError = .serverError("Facility sign up succeeded (status \(httpResponse.statusCode)) but returned an unexpected response format (expected FacilitySignUpAPIResponse or FacilityAuthResponse).")
+                        lastError = .serverError("Facility sign up request completed with status \(httpResponse.statusCode) but returned an unexpected response format (expected FacilitySignUpAPIResponse or FacilityAuthResponse).")
                         continue
                     }
                 }
