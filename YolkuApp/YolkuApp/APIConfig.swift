@@ -22,9 +22,11 @@ struct APIConfig {
     // Local development URL
     static let developmentURL = "http://localhost:3000"
     
-    // Current environment - change this to switch between prod and dev
+    // Set to true only when you are actively running the backend locally.
+    // Debug builds now use production by default so signup works out of the box.
     #if DEBUG
-    static let baseURL = developmentURL
+    static let useLocalDevelopmentServer = false
+    static let baseURL = useLocalDevelopmentServer ? developmentURL : productionURL
     #else
     static let baseURL = productionURL
     #endif
