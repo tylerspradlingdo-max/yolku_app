@@ -714,6 +714,7 @@ class APIService {
         )
         let requestBody = try JSONEncoder().encode(body)
         let signUpEndpoints = [APIConfig.Facilities.signUp, APIConfig.Facilities.signUpFallback]
+        var lastError: APIError = .serverError("Facility sign up failed due to an invalid endpoint configuration.")
         
         for (index, endpoint) in signUpEndpoints.enumerated() {
             guard let url = URL(string: endpoint) else {
@@ -732,30 +733,37 @@ class APIService {
             }
             
             if (200...299).contains(httpResponse.statusCode) {
-                if let facilityResponse = try? JSONDecoder().decode(FacilitySignUpAPIResponse.self, from: data) {
+                do {
+                    let facilityResponse = try JSONDecoder().decode(FacilitySignUpAPIResponse.self, from: data)
                     return FacilityAuthResponse(
                         message: facilityResponse.message,
                         token: facilityResponse.data.token,
                         facility: facilityResponse.data.facility
                     )
+                } catch {
+                    do {
+                        let facilityResponse = try JSONDecoder().decode(FacilityAuthResponse.self, from: data)
+                        return facilityResponse
+                    } catch {
+                        throw APIError.serverError("Facility sign up succeeded but returned an unexpected response format.")
+                    }
                 }
-                if let facilityResponse = try? JSONDecoder().decode(FacilityAuthResponse.self, from: data) {
-                    return facilityResponse
-                }
-                throw APIError.serverError("Facility sign up succeeded but returned an unexpected response format.")
             }
             
-            if httpResponse.statusCode == 404 && index < signUpEndpoints.count - 1 {
+            let isLastEndpoint = index == signUpEndpoints.count - 1
+            if httpResponse.statusCode == 404 && !isLastEndpoint {
                 continue
             }
             
             if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw APIError.serverError(errorResponse.error)
+                lastError = .serverError(errorResponse.error)
+            } else {
+                lastError = .serverError("Facility sign up failed with status code: \(httpResponse.statusCode)")
             }
-            throw APIError.serverError("Facility sign up failed with status code: \(httpResponse.statusCode)")
+            break
         }
         
-        throw APIError.serverError("Facility sign up failed due to an invalid endpoint configuration.")
+        throw lastError
     }
     
     // MARK: - Positions
