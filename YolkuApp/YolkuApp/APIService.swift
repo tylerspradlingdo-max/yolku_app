@@ -700,15 +700,6 @@ class APIService {
             )
         }
         
-        // Real API mode - connect to server
-        guard let url = URL(string: APIConfig.Facilities.signUp) else {
-            throw APIError.invalidURL
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
         let body = FacilitySignUpRequest(
             name: name,
             email: email,
@@ -721,28 +712,62 @@ class APIService {
             facilityType: facilityType,
             description: description
         )
+        let requestBody = try JSONEncoder().encode(body)
+        let signUpEndpoints = [APIConfig.Facilities.signUp, APIConfig.Facilities.signUpFallback]
+        var lastError: APIError?
         
-        request.httpBody = try JSONEncoder().encode(body)
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
-        }
-        
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw APIError.serverError(errorResponse.error)
+        for endpoint in signUpEndpoints {
+            guard let url = URL(string: endpoint) else {
+                lastError = .invalidURL
+                continue
             }
-            throw APIError.serverError("Facility sign up failed with status code: \(httpResponse.statusCode)")
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = requestBody
+            
+            let data: Data
+            let response: URLResponse
+            do {
+                (data, response) = try await URLSession.shared.data(for: request)
+            } catch {
+                lastError = .networkError(error.localizedDescription)
+                continue
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                lastError = .invalidResponse
+                continue
+            }
+            
+            if (200...299).contains(httpResponse.statusCode) {
+                do {
+                    let facilityResponse = try JSONDecoder().decode(FacilitySignUpAPIResponse.self, from: data)
+                    return FacilityAuthResponse(
+                        message: facilityResponse.message,
+                        token: facilityResponse.data.token,
+                        facility: facilityResponse.data.facility
+                    )
+                } catch {
+                    do {
+                        let facilityResponse = try JSONDecoder().decode(FacilityAuthResponse.self, from: data)
+                        return facilityResponse
+                    } catch {
+                        lastError = .serverError("Facility sign up request completed with status \(httpResponse.statusCode) but returned an unexpected response format (expected FacilitySignUpAPIResponse or FacilityAuthResponse).")
+                        continue
+                    }
+                }
+            }
+            
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                lastError = .serverError(errorResponse.error)
+            } else {
+                lastError = .serverError("Facility sign up failed with status code: \(httpResponse.statusCode)")
+            }
         }
-        
-        let facilityResponse = try JSONDecoder().decode(FacilitySignUpAPIResponse.self, from: data)
-        return FacilityAuthResponse(
-            message: facilityResponse.message,
-            token: facilityResponse.data.token,
-            facility: facilityResponse.data.facility
-        )
+
+        throw lastError ?? .serverError("Facility sign up failed after trying all configured endpoints.")
     }
     
     // MARK: - Positions

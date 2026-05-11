@@ -78,6 +78,7 @@ struct APIConfig {
     
     struct Facilities {
         static let signUp = "\(baseURL)\(apiPath)/facilities/signup"
+        static let signUpFallback = "\(baseURL)\(apiPath)/facility/signup"
         static let signIn = "\(baseURL)\(apiPath)/facilities/signin"
         static let profile = "\(baseURL)\(apiPath)/facilities/profile"
         static let positions = "\(baseURL)\(apiPath)/facilities/positions"
